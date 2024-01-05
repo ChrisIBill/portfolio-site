@@ -4,7 +4,7 @@ const Footer = () => {
     return (
         <footer className="absolute bottom-0">
             <div className="flex w-screen justify-center">
-                <span className="text-default-500">Made with </span>
+                <span className="text-default-500 whitespace-normal mr-1">Made with</span>
                 <Link href="https://nextjs.org/">
                     Next.JS
                 </Link>
