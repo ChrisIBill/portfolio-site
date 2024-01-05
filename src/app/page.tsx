@@ -1,11 +1,15 @@
-import ThemeSwitcher from '@/lib/theme-switcher'
+import ThemeSwitcher from './components/theme/theme-switcher'
 import BioComponent from './components/bio'
+import MainMenu from './components/main-menu'
 
 export default function Home() {
     return (
-        <main className="bg-default-300 flex min-h-screen flex-col items-center justify-between p-24 ">
+        <div className="bg-default-200 dark:bg-default-600 flex min-h-screen min-w-screen flex-col items-center justify-between p-24 transition-colors">
             <ThemeSwitcher />
-            <BioComponent />
-        </main>
+            <div className='w-full h-fit flex flex-1 items justify-around'>
+                <BioComponent />
+                <MainMenu />
+            </div>
+        </div>
     )
 }
