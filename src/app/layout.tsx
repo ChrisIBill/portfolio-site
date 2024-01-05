@@ -3,6 +3,7 @@ import { Lato } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/lib/providers'
 import ThemeSwitcher from './components/theme/theme-switcher'
+import Footer from './components/footer'
 
 const font = Lato({ weight: '400', subsets: ['latin'] })
 
@@ -22,6 +23,7 @@ export default function RootLayout({
                 <Providers>
                     <ThemeSwitcher />
                     <main className={font.className}>{children}</main>
+                    <Footer />
                 </Providers>
             </body>
         </html>
