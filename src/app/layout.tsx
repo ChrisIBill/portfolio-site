@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Lato } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/lib/providers'
+import ThemeSwitcher from './components/theme/theme-switcher'
 
 const font = Lato({ weight: '400', subsets: ['latin'] })
 
@@ -19,6 +20,7 @@ export default function RootLayout({
         <html lang="en" suppressHydrationWarning>
             <body>
                 <Providers>
+                    <ThemeSwitcher />
                     <main className={font.className}>{children}</main>
                 </Providers>
             </body>
