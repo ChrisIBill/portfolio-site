@@ -18,7 +18,7 @@ const ThemeSwitcher = () => {
 
     return (
         <button
-            className="theme-toggle"
+            className="absolute top-0 left-0 p-4 postion-fixed"
             type="button"
             title="Toggle theme"
             aria-label="Toggle theme"
