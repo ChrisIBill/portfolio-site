@@ -1,7 +1,7 @@
 'use client'
-import ThemeToggleButtonIcon from "@/app/components/theme";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import ThemeToggleButtonIcon from "./theme";
 
 const ThemeSwitcher = () => {
     const [mounted, setMounted] = useState(false)
