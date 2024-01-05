@@ -1,10 +1,9 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Lato } from 'next/font/google'
 import './globals.css'
-import { NextUIProvider } from '@nextui-org/react'
 import { Providers } from '@/lib/providers'
 
-const inter = Inter({ subsets: ['latin'] })
+const font = Lato({ weight: '400', subsets: ['latin'] })
 
 export const metadata: Metadata = {
     title: 'Create Next App',
@@ -17,10 +16,10 @@ export default function RootLayout({
     children: React.ReactNode
 }) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
             <body>
                 <Providers>
-                    {children}
+                    <main className={font.className}>{children}</main>
                 </Providers>
             </body>
         </html>
