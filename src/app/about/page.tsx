@@ -4,9 +4,6 @@
 export default function Home() {
     return (
         <div className="bg-default-200 dark:bg-default-600 flex min-h-screen min-w-screen flex-col items-center justify-around sm:px-28 px-4 transition-colors">
-            <h2 className="text-3xl my-3 text-foreground-900 self-center py-12">
-                About
-            </h2>
             <div className='flex flex-col flex-1 justify-center'>
                 <AboutTextWrapper>
                     I'm a Software Engineer and Web Developer with a passion for building performant applications and expanding my knowledge of the field.

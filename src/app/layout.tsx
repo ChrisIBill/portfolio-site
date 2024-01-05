@@ -4,6 +4,7 @@ import './globals.css'
 import { Providers } from '@/lib/providers'
 import ThemeSwitcher from './components/theme/theme-switcher'
 import Footer from './components/footer'
+import Header from './components/header'
 
 const font = Lato({ weight: '400', subsets: ['latin'] })
 
@@ -21,8 +22,8 @@ export default function RootLayout({
         <html lang="en" suppressHydrationWarning>
             <body>
                 <Providers>
-                    <ThemeSwitcher />
-                    <main className={font.className}>{children}</main>
+                    <Header />
+                    <main className={font.className + ' absolute top-0 w-screen'}>{children}</main>
                     <Footer />
                 </Providers>
             </body>
