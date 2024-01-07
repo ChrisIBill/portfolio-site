@@ -18,7 +18,7 @@ const PathnamesToDisplayTitles: GenericKeyValueObject<string> = {
 const Header = () => {
     const pathname = usePathname()
     return (
-        <header className='flex flex-col fixed w-screen z-50'>
+        <header className='flex flex-col fixed w-screen z-50 text-default-900'>
             <div className='flex justify-between'>
                 <div>
                     {/* Filler Element */}

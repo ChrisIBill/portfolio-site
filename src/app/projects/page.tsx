@@ -10,7 +10,7 @@ export default function Home() {
             <div>
                 <ProjectComponent
                     title='Drizzle (Yet Another Weather App)'
-                    description='A weather app constructed with NextJS. Uses Open-Meteo API for weather data and googles location apis. Deployed on Vercel.'
+                    description='A weather app constructed with Next.JS. Uses Open-Meteo API for weather data and googles location apis. Deployed on Vercel.'
                     url='https://drizzleweather.vercel.app/'
                     icon={<TiWeatherDownpour className='h-full text-default-900 self-center mx-2' />}
                     githubURL='https://github.com/ChrisIBill/next-weather-app'

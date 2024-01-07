@@ -18,7 +18,7 @@ export default function Home() {
                     With extensive knowledge of
                 </AboutTextWrapper>
                 <AboutTextWrapper>
-                    C#, JavaScript, TypeScript, HTML, CSS, SQL, and Python
+                    C#, JavaScript, TypeScript, HTML, CSS, SQL, and Python.
                 </AboutTextWrapper>
                 <AboutTextWrapper>
                     Currently seeking full-time opportunities in the field and working on personal projects in my free time.
