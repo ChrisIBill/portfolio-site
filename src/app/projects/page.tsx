@@ -25,7 +25,7 @@ export default function Home() {
 
                 <ProjectComponent
                     title='Simple Compiler'
-                    description='A simple compile built with C, Flex and Bison. Compiles from TS-13 to C.'
+                    description='A simple compiler built with C, Flex and Bison. Compiles from TS-13 to C.'
                     githubURL='https://github.com/ChrisIBill/simple-compiler'
                 />
             </div>
