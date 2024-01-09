@@ -9,7 +9,17 @@ import GoogleAnalytics from './google-analytics'
 const font = Lato({ weight: '400', subsets: ['latin'] })
 
 export const metadata: Metadata = {
-    title: 'Portfolio | Chris Billingham',
+    generator: 'Next.JS',
+    authors: { name: 'Christopher Billingham' },
+    creator: 'Christopher Billingham',
+    publisher: 'Christopher Billingham',
+    robots: 'all',
+    keywords: 'portfolio, website, web development, software engineering, react, next.js, tailwind css, chris billingham, christopher billingham, tailwind, full stack, full stack engineer, web developer, developer',
+    colorScheme: 'dark light',
+    title: {
+        template: '%s | Chris Billingham',
+        default: 'Chris Billingham',
+    },
     description: 'Chris Billingham\'s portfolio website. Built with Next.JS and Tailwind CSS.',
 }
 

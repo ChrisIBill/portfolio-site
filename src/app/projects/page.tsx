@@ -4,10 +4,15 @@ import { IoGlobeOutline, IoLogoGithub } from "react-icons/io5"
 import { RiGlobeLine } from "react-icons/ri"
 import { PiGlobeBold } from "react-icons/pi"
 
+export const metadata = {
+    title: 'Projects',
+    description: 'Chris Billingham\'s portfolio website. Built with Next.JS and Tailwind CSS.',
+}
+
 export default function Home() {
     return (
         <div className="pt-20 pb-12 px-4 sm:px-24 min-h-[42rem] sm:min-h-[37rem] min-w-[350px]
-            min-h-fit h-screen w-screen flex flex-1 flex-col items-center justify-between">
+            min-h-fit h-screen w-screen flex flex-1 flex-col items-center justify-between transition-all animate-fadeIn">
             <ProjectComponent
                 title='Drizzle (Yet Another Weather App)'
                 description='A weather app constructed with Next.JS.
