@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Lato } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/lib/providers'
@@ -8,6 +8,10 @@ import GoogleAnalytics from './google-analytics'
 
 const font = Lato({ weight: '400', subsets: ['latin'] })
 
+export const viewport: Viewport = {
+    themeColor: 'dark'
+}
+
 export const metadata: Metadata = {
     generator: 'Next.JS',
     authors: { name: 'Christopher Billingham' },
@@ -15,7 +19,6 @@ export const metadata: Metadata = {
     publisher: 'Christopher Billingham',
     robots: 'all',
     keywords: 'portfolio, website, web development, software engineering, react, next.js, tailwind css, chris billingham, christopher billingham, tailwind, full stack, full stack engineer, web developer, developer',
-    colorScheme: 'dark light',
     metadataBase: new URL('https://christopher-billingham.com'),
     alternates: {
         canonical: '/',
@@ -33,7 +36,7 @@ export default function RootLayout({
     children: React.ReactNode
 }) {
     return (
-        <html lang="en" className='w-screen h-fit overflow-scroll min-w-[350px]' suppressHydrationWarning>
+        <html lang="en" className='w-screen h-fit overflow-y-scroll overflow-x-scroll xs:overflow-x-hidden min-w-[350px]' suppressHydrationWarning>
             <body>
                 {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS ? (
                     <GoogleAnalytics ga_id=
