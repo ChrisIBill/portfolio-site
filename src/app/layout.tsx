@@ -4,6 +4,7 @@ import './globals.css'
 import { Providers } from '@/lib/providers'
 import Footer from './components/footer'
 import NextHeader from './components/header'
+import GoogleAnalytics from './google-analytics'
 
 const font = Lato({ weight: '400', subsets: ['latin'] })
 
@@ -20,6 +21,10 @@ export default function RootLayout({
     return (
         <html lang="en" className='w-screen h-fit overflow-scroll min-w-[350px]' suppressHydrationWarning>
             <body>
+                {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS ? (
+                    <GoogleAnalytics ga_id=
+                        {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS} />
+                ) : null}
                 <Providers className='h-fit'>
                     <NextHeader />
                     <main className={font.className + ' box-border bg-default-200 dark:bg-default-800 transition-colors'}>{children}</main>
