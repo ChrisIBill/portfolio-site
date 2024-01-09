@@ -9,23 +9,24 @@ import { Classic } from "@theme-toggles/react";
 const ThemeSwitcher = () => {
     const [mounted, setMounted] = useState(false)
     const { theme, setTheme } = useTheme()
-    const [toggled, setToggled] = useState(useTheme().theme === "dark")
 
     const handleThemeChange = () => {
         console.log('theme changed: ' + theme)
-        setTheme(toggled ? "light" : "dark")
-        setToggled(!toggled)
+        setTheme(theme === "dark" ? "light" : "dark")
     }
 
     useEffect(() => {
         setMounted(true)
     }, [])
 
+    if (!mounted) {
+        return null
+    }
     return (
         <div
             className='text-3xl w-4 mx-4 mt-2 text-foreground'
         >
-            <Classic duration={750} placeholder={<></>} toggled={toggled} onToggle={handleThemeChange} forceMotion />
+            <Classic duration={750} placeholder={<></>} toggled={theme === "dark"} onToggle={handleThemeChange} forceMotion />
         </div>
     )
 };
