@@ -3,8 +3,8 @@ import Footer from "../components/footer"
 /* eslint-disable react/no-unescaped-entities */
 export default function Home() {
     return (
-        <div className="pb-12 pt-24 box-border px-4 sm:px-24 min-h-[28rem] sm:min-h-[37rem] min-w-[350px]
-            min-h-fit h-screen w-screen flex flex-1 flex-col items-center justify-between">
+        <div className="box-border px-4 sm:px-24 min-h-[30rem] sm:min-h-[30rem] min-w-[350px]
+            min-h-fit h-screen w-screen flex flex-1 flex-col items-center justify-around">
             {/* <div className="pt-24 pb-12 px-4 sm:px-24 min-h-[22rem] sm:min-h-[22rem] h-screen min-w-350 w-screen  */}
             {/*     flex flex-col left-0 items-center"> */}
             <AboutSection />
@@ -22,7 +22,7 @@ const AboutTextWrapper: React.FC<{ children: React.ReactNode }> = (props) => {
 
 const AboutSection = () => {
     return (
-        <div className="flex flex-col mt-2 min-h-full w-full items-center justify-center transition-tranform">
+        <div className="flex flex-col min-h-fit w-full items-center justify-center transition-tranform">
             <div className="flex flex-col justify-center w-full">
                 <AboutTextWrapper>
                     I'm a Software Engineer and Web Developer with a passion for building performant applications and expanding my knowledge of the field.

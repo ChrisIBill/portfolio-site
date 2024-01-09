@@ -1,11 +1,5 @@
 import { Link } from '@nextui-org/react'
 
-export async function getStaticProps(context) {
-    return {
-        notFound: true, // triggers 404
-    };
-}
-
 export default function NotFound() {
     return (
         <div className='w-screen h-screen flex flex-col justify-center items-center'>
