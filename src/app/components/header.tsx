@@ -24,7 +24,7 @@ const NextHeader = () => {
         <Navbar
             className="absolute min-w-fit">
             <NavbarBrand className="hidden md:flex text-default-900 min-w-fit min-h-fit">
-                <p className="font-bold text-inherit">Christopher Billingham</p>
+                {/* TODO: Logo */}
             </NavbarBrand>
             <NavbarContent className="flex gap-4 min-w-fit" justify="center">
                 {SiteLinks.map((item, index) => {

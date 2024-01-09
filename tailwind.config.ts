@@ -11,6 +11,10 @@ const config: Config = {
     theme: {
         extend: {
             keyframes: {
+                fadeIn: {
+                    '0%': { opacity: '0' },
+                    '100%': { opacity: '1' },
+                },
                 slideInLeft: {
                     '0%': { transform: 'translateX(-150%)' },
                     '100%': { transform: 'translateX(0)' },
@@ -23,11 +27,17 @@ const config: Config = {
                     '0%, 100%': { transform: 'rotate(-3deg)' },
                     '50%': { transform: 'rotate(3deg)' },
                 },
+                scaleUp: {
+                    '0%': { transform: 'scale(0)' },
+                    '100%': { transform: 'scale(1)' },
+                }
             },
             animation: {
+                fadeIn: 'fadeIn 1s ease-in-out',
                 slideInLeft: 'slideInLeft 1s ease-in-out',
                 slideInRight: 'slideInRight 1s ease-in-out',
                 wiggle: 'wiggle 1s ease-in-out infinite',
+                scaleUp: 'scaleUp 1s ease-in-out',
             },
             backgroundImage: {
                 'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
