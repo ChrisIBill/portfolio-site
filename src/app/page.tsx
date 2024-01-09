@@ -4,11 +4,9 @@ import MainMenu from './components/main-menu'
 
 export default function Home() {
     return (
-        <div className="bg-default-200 dark:bg-default-600 flex p-16 min-h-screen min-w-screen flex-col items-center justify-between transition-colors">
-            <div className='w-full h-fit flex flex-col flex-1 items justify-center'>
-                <BioComponent />
-                <MainMenu />
-            </div>
+        <div className="pt-20 pb-12 px-4 sm:px-24 min-h-[15rem] top-0 left-0 min-h-fit h-screen min-w-fit w-screen flex-1 flex-col items-center justify-between">
+            <BioComponent />
+            {/* <MainMenu /> */}
         </div>
     )
 }

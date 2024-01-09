@@ -3,7 +3,7 @@ import { Lato } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/lib/providers'
 import Footer from './components/footer'
-import Header from './components/header'
+import NextHeader from './components/header'
 
 const font = Lato({ weight: '400', subsets: ['latin'] })
 
@@ -18,11 +18,11 @@ export default function RootLayout({
     children: React.ReactNode
 }) {
     return (
-        <html lang="en" suppressHydrationWarning>
+        <html lang="en" className='w-screen h-fit overflow-scroll min-w-[350px]' suppressHydrationWarning>
             <body>
-                <Providers>
-                    <Header />
-                    <main className={font.className + ' absolute top-0 w-screen'}>{children}</main>
+                <Providers className='h-fit'>
+                    <NextHeader />
+                    <main className={font.className + ' box-border bg-default-200 dark:bg-default-800 transition-colors'}>{children}</main>
                     <Footer />
                 </Providers>
             </body>

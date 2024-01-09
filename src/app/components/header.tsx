@@ -5,14 +5,58 @@ import { usePathname } from "next/navigation"
 import ThemeSwitcher from "./theme/theme-switcher"
 import { Divider } from "@nextui-org/divider"
 import React from "react"
-import { Link } from "@nextui-org/react"
-import { IoChevronBackSharp } from "react-icons/io5"
+import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link } from "@nextui-org/react";
+import { SiteLinks } from "./links"
+
+
 
 const PathnamesToDisplayTitles: GenericKeyValueObject<string> = {
     '/': 'Home',
     '/about': 'About',
     '/projects': 'Projects',
     '/contact': 'Contact'
+}
+
+
+const NextHeader = () => {
+    const pathname = usePathname()
+    return (
+        <Navbar
+            className="absolute min-w-fit">
+            <NavbarBrand className="hidden md:flex text-default-900 min-w-fit min-h-fit">
+                <p className="font-bold text-inherit">Christopher Billingham</p>
+            </NavbarBrand>
+            <NavbarContent className="flex gap-4 min-w-fit" justify="center">
+                {SiteLinks.map((item, index) => {
+                    return (
+                        <NavbarItem
+                            isActive={item.link === pathname}
+                            key={item.text + '-menu-item'}
+                            className='flex nowrap items-center'
+                        >
+                            <Link
+                                aria-label={item.text + ' menu item'}
+                                title={item.label}
+                                color="foreground"
+                                className='ml-2'
+                                href={item.link}>
+                                {item.icon}
+                                <div
+
+                                    className={`${item.link === pathname ? '' : 'hidden'} ml-2 sm:flex text-default-900`}
+                                >
+                                    {item.text}
+                                </div>
+                            </Link>
+                        </NavbarItem>
+                    )
+                })}
+            </NavbarContent>
+            <NavbarContent className="flex gap-4" justify="end">
+                <ThemeSwitcher />
+            </NavbarContent>
+        </Navbar>
+    );
 }
 
 const Header = () => {
@@ -40,4 +84,4 @@ const Header = () => {
     )
 }
 
-export default Header
+export default NextHeader

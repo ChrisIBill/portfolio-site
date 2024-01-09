@@ -12,7 +12,7 @@ export function Providers({ children, className }: { children: React.ReactNode, 
     return (
         <NextUIProvider className={className} navigate={router.push}>
             <ThemeProvider defaultTheme='dark'>
-                <IconContext.Provider value={{ color: 'blue', className: 'text-black' }}>
+                <IconContext.Provider value={{ className: 'text-black' }}>
                     <RootStyleRegistry>
                         {children}
                     </RootStyleRegistry>

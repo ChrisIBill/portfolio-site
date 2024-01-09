@@ -1,6 +1,6 @@
 const BioComponent: React.FC = () => {
     return (
-        <div className="relative flex flex-col w-full min-h-fit items-center justify-center transition-transform animate-slideInLeft">
+        <div className="relative flex flex-col w-full min-h-full items-center justify-center transition-transform animate-slideInLeft">
             <div className="relative bottom-8 flex flex-col w-fit justify-center">
                 <h1 className="text-3xl my-3 text-foreground-900 self-center">
                     Christopher Billingham

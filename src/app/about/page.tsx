@@ -1,10 +1,29 @@
-/** @jsxImportSource @emotion/react */
-'use client'
+import Footer from "../components/footer"
+
 /* eslint-disable react/no-unescaped-entities */
 export default function Home() {
     return (
-        <div className="bg-default-200 dark:bg-default-600 flex min-h-screen min-w-screen flex-col items-center justify-around sm:px-28 px-4 transition-colors">
-            <div className='flex flex-col flex-1 justify-center'>
+        <div className="pb-12 pt-24 box-border px-4 sm:px-24 min-h-[28rem] sm:min-h-[37rem] min-w-[350px]
+            min-h-fit h-screen w-screen flex flex-1 flex-col items-center justify-between">
+            {/* <div className="pt-24 pb-12 px-4 sm:px-24 min-h-[22rem] sm:min-h-[22rem] h-screen min-w-350 w-screen  */}
+            {/*     flex flex-col left-0 items-center"> */}
+            <AboutSection />
+        </div >
+    )
+}
+
+const AboutTextWrapper: React.FC<{ children: React.ReactNode }> = (props) => {
+    return (
+        <div className="text-foreground-900 self-center text-center whitespace-normal">
+            {props.children}
+        </div>
+    )
+}
+
+const AboutSection = () => {
+    return (
+        <div className="flex flex-col mt-2 min-h-full w-full items-center justify-center transition-tranform">
+            <div className="flex flex-col justify-center w-full">
                 <AboutTextWrapper>
                     I'm a Software Engineer and Web Developer with a passion for building performant applications and expanding my knowledge of the field.
                 </AboutTextWrapper>
@@ -24,14 +43,6 @@ export default function Home() {
                     Currently seeking full-time opportunities in the field and working on personal projects in my free time.
                 </AboutTextWrapper>
             </div>
-        </div >
-    )
-}
-
-const AboutTextWrapper: React.FC<{ children: React.ReactNode }> = (props) => {
-    return (
-        <div className="text-foreground-900 self-center text-center">
-            {props.children}
         </div>
     )
 }

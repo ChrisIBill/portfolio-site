@@ -23,7 +23,7 @@ const ThemeSwitcher = () => {
 
     return (
         <div
-            className='text-3xl w-4 mx-4 mt-2'
+            className='text-3xl w-4 mx-4 mt-2 text-foreground'
         >
             <Classic duration={750} placeholder={<></>} toggled={toggled} onToggle={handleThemeChange} forceMotion />
         </div>
