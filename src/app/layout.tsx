@@ -16,6 +16,10 @@ export const metadata: Metadata = {
     robots: 'all',
     keywords: 'portfolio, website, web development, software engineering, react, next.js, tailwind css, chris billingham, christopher billingham, tailwind, full stack, full stack engineer, web developer, developer',
     colorScheme: 'dark light',
+    metadataBase: new URL('https://christopher-billingham.com'),
+    alternates: {
+        canonical: '/',
+    },
     title: {
         template: '%s | Chris Billingham',
         default: 'Chris Billingham',
