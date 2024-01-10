@@ -16,6 +16,12 @@ const config: Config = {
             ...defaultTheme.screens,
         },
         extend: {
+            dropShadow: {
+                glow: [
+                    "0 0px 20px rgba(255,255, 255, 0.35)",
+                    "0 0px 65px rgba(255, 255,255, 0.2)"
+                ]
+            },
             keyframes: {
                 fadeIn: {
                     '0%': { opacity: '0' },

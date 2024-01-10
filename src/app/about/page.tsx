@@ -27,7 +27,7 @@ const AboutTextWrapper: React.FC<{ children: React.ReactNode }> = (props) => {
 
 const AboutSection = () => {
     return (
-        <div className="flex flex-col min-h-fit w-full items-center justify-center transition-tranform">
+        <div className="flex flex-col min-h-fit w-fit full items-center justify-center transition-transform drop-shadow-glow">
             <div className="flex flex-col justify-center w-full">
                 <AboutTextWrapper>
                     I'm a Software Engineer and Web Developer with a passion for building performant applications and expanding my knowledge of the field.
