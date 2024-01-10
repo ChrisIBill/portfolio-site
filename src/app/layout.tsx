@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     creator: 'Christopher Billingham',
     publisher: 'Christopher Billingham',
     robots: 'all',
-    keywords: 'portfolio, website, web development, software engineering, react, next.js, tailwind css, chris billingham, christopher billingham, tailwind, full stack, full stack engineer, web developer, developer',
+    keywords: 'portfolio, website, web development, software engineering, react, next.js, tailwind css, chris billingham, christopher billingham, tailwind, full stack, full stack engineer, web developer, developer, javascript, typescript, .net, c-sharp, c#, vite, front end, front end developer',
     metadataBase: new URL('https://christopher-billingham.com'),
     alternates: {
         canonical: '/',

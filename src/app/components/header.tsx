@@ -39,7 +39,9 @@ const NextHeader = () => {
                                 title={item.label}
                                 color="foreground"
                                 className='ml-2'
-                                href={item.link}>
+                                href={item.link}
+                                isExternal={item.isExternal}
+                            >
                                 {item.icon}
                                 <div
 
