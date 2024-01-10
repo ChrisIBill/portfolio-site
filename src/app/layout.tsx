@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Lato } from 'next/font/google'
-import './globals.css'
+import './globals.scss'
 import { Providers } from '@/lib/providers'
 import Footer from './components/footer'
 import NextHeader from './components/header'
