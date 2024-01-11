@@ -27,7 +27,7 @@ export const metadata: Metadata = {
         template: '%s | Chris Billingham',
         default: 'Chris Billingham',
     },
-    description: 'Chris Billingham\'s portfolio website. Built with Next.JS and Tailwind CSS.',
+    description: 'Software Engineer and Web Developer with a B.S. in Computer Science. Built with Next.JS.',
 }
 
 export default function RootLayout({
