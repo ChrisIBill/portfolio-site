@@ -5,8 +5,9 @@ import { usePathname } from "next/navigation"
 import ThemeSwitcher from "./theme/theme-switcher"
 import { Divider } from "@nextui-org/divider"
 import React from "react"
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link } from "@nextui-org/react";
-import { SiteLinks } from "./links"
+import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, NavbarMenuToggle, NavbarMenuItem, NavbarMenu } from "@nextui-org/react";
+import { SiteLinks, SiteLinkType } from "./links"
+import { useIsLessThanXS } from "@/lib/hooks/resize"
 
 
 
@@ -40,45 +41,119 @@ const NextHeader = () => {
                     "data-[active=true]:text-primary",
                 ],
             }}
-            className="w-screen overflow-hidden px-0"
+            className="w-screen overflow-hidden px-0 h-16 flex-none"
         >
-            <NavbarBrand className="hidden md:flex text-default-900 min-w-fit min-h-fit">
+            <NavbarContent className="visible xs:invisible xs:w-0 gap-4" justify="start">
+                <NavbarMenuToggle />
+            </NavbarContent>
+            <NavbarBrand className="hidden md:flex text-default-900">
                 {/* TODO: Logo */}
             </NavbarBrand>
-            <NavbarContent className="flex gap-4 min-w-fit" justify="center">
-                {SiteLinks.map((item, index) => {
-                    return (
-                        <NavbarItem
-                            isActive={item.link === pathname}
-                            key={item.text + '-menu-item'}
-                            className='flex nowrap items-center'
-                        >
-                            <Link
-                                aria-label={item.text + ' menu item'}
-                                title={item.label}
-                                className='ml-2 text-inherit'
-                                href={item.link}
-                                isExternal={item.isExternal}
-                            >
-                                {item.icon}
-                                <div
-
-                                    className={`${item.link === pathname ? '' : 'hidden'} ml-2 sm:flex text-inherit`}
-                                >
-                                    {item.text}
-                                </div>
-                            </Link>
-                        </NavbarItem>
-                    )
-                })}
-            </NavbarContent>
+            <NavBarMenuItems pathname={pathname} />
+            {/* {SiteLinks.map((item, index) => { */}
+            {/*     return ( */}
+            {/*         <NavbarItem */}
+            {/*             isActive={item.link === pathname} */}
+            {/*             key={item.text + '-menu-item'} */}
+            {/*             className='flex nowrap items-center' */}
+            {/*         > */}
+            {/*             <Link */}
+            {/*                 aria-label={item.text + ' menu item'} */}
+            {/*                 title={item.label} */}
+            {/*                 className='ml-2 text-inherit' */}
+            {/*                 href={item.link} */}
+            {/*                 isExternal={item.isExternal} */}
+            {/*             > */}
+            {/*                 {item.icon} */}
+            {/*                 <div */}
+            {/**/}
+            {/*                     className={`${item.link === pathname ? '' : 'hidden'} ml-2 sm:flex text-inherit`} */}
+            {/*                 > */}
+            {/*                     {item.text} */}
+            {/*                 </div> */}
+            {/*             </Link> */}
+            {/*         </NavbarItem> */}
+            {/*     ) */}
+            {/* })} */}
             <NavbarContent className="flex gap-4" justify="end">
                 <ThemeSwitcher />
             </NavbarContent>
-        </Navbar>
+        </Navbar >
     );
 }
 
+const NavBarMenuItems = (props: {
+    pathname: string
+}) => {
+    const lessThanXs = useIsLessThanXS()
+    const [isClient, setIsClient] = React.useState(false)
+
+    React.useEffect(() => {
+        setIsClient(true)
+    }, [])
+
+    if (!isClient)
+        return <ListMenuItems pathname={props.pathname} />
+    return lessThanXs ? <ListMenuItems pathname={props.pathname} />
+        : <ContentMenuItems pathname={props.pathname} />
+}
+
+const ListMenuItems = (props: any) => {
+    return (
+        <NavbarMenu className='flex flex-col gap-4'>
+            {SiteLinks.map((item) => {
+                return (
+                    <NavbarMenuItem
+                        isActive={item.link === props.pathname}
+                        key={item.text + '-menu-item'}
+                        className='flex nowrap items-center'
+                    >
+                        <MenuItemLink item={item} pathname={props.pathname} />
+                    </NavbarMenuItem>
+                )
+            })}
+        </NavbarMenu>
+    )
+}
+
+const ContentMenuItems = (props: any) => {
+    return (
+        <NavbarContent className='flex gap-4' justify="center">
+            {SiteLinks.map((item) => {
+                return (
+                    <NavbarItem
+                        isActive={item.link === props.pathname}
+                        key={item.text + '-menu-item'}
+                        className='flex nowrap items-center'
+                    >
+                        <MenuItemLink item={item} pathname={props.pathname} />
+                    </NavbarItem>
+                )
+            })}
+        </NavbarContent >
+    )
+}
+const MenuItemLink = (props: {
+    item: SiteLinkType
+    pathname: string
+}) => {
+    return (
+        <Link
+            aria-label={props.item.text + ' menu item'}
+            title={props.item.label}
+            className='ml-2 text-inherit'
+            href={props.item.link}
+            isExternal={props.item.isExternal}
+        >
+            {props.item.icon}
+            <div
+                className={`${props.item.link === props.pathname ? '' : 'inline xs:hidden sm:inline'} ml-2 sm:flex text-inherit`}
+            >
+                {props.item.text}
+            </div>
+        </Link>
+    )
+}
 const Header = () => {
     const pathname = usePathname()
     return (
