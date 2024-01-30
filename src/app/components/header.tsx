@@ -22,7 +22,26 @@ const NextHeader = () => {
     const pathname = usePathname()
     return (
         <Navbar
-            className="absolute min-w-fit">
+            classNames={{
+                item: [
+                    //"transition-colors",
+                    "flex",
+                    "relative",
+                    "h-full",
+                    "items-center",
+                    "data-[active=true]:after:content-['']",
+                    "data-[active=true]:after:absolute",
+                    "data-[active=true]:after:bottom-0",
+                    "data-[active=true]:after:left-0",
+                    "data-[active=true]:after:right-0",
+                    "data-[active=true]:after:h-[2px]",
+                    "data-[active=true]:after:rounded-[2px]",
+                    "data-[active=true]:after:bg-primary",
+                    "data-[active=true]:text-primary",
+                ],
+            }}
+            className="absolute w-screen overflow-hidden px-0"
+        >
             <NavbarBrand className="hidden md:flex text-default-900 min-w-fit min-h-fit">
                 {/* TODO: Logo */}
             </NavbarBrand>
@@ -37,15 +56,14 @@ const NextHeader = () => {
                             <Link
                                 aria-label={item.text + ' menu item'}
                                 title={item.label}
-                                color="foreground"
-                                className='ml-2'
+                                className='ml-2 text-inherit'
                                 href={item.link}
                                 isExternal={item.isExternal}
                             >
                                 {item.icon}
                                 <div
 
-                                    className={`${item.link === pathname ? '' : 'hidden'} ml-2 sm:flex text-default-900`}
+                                    className={`${item.link === pathname ? '' : 'hidden'} ml-2 sm:flex text-inherit`}
                                 >
                                     {item.text}
                                 </div>
