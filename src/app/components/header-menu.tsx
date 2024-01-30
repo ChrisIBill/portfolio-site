@@ -45,7 +45,7 @@ const ContentMenuItems = (props: any) => {
                     <NavbarItem
                         isActive={item.link === props.pathname}
                         key={item.text + '-menu-item'}
-                        className='flex nowrap items-center'
+                        className='flex nowrap items-center text-default-900'
                     >
                         <MenuItemLink item={item} pathname={props.pathname} />
                     </NavbarItem>
@@ -62,17 +62,18 @@ const MenuItemLink = (props: {
         <Link
             aria-label={props.item.text + ' menu item'}
             title={props.item.label}
-            className='ml-2 text-inherit'
+            className='ml-2 text-default-900'
             href={props.item.link}
             isExternal={props.item.isExternal}
         >
             {props.item.icon}
-            <div
-                className={`${props.item.link === props.pathname ? '' : 'inline xs:hidden sm:inline'} ml-2 sm:flex text-inherit`}
+            < div
+                className={`${props.item.link === props.pathname ? '' : 'inline xs:hidden sm:inline'} ml-2 sm:flex text-inherit text-default-900`
+                }
             >
                 {props.item.text}
             </div>
-        </Link>
+        </Link >
     )
 }
 
