@@ -11,8 +11,7 @@ export const metadata = {
 
 export default function Home() {
     return (
-        <div className="pt-20 pb-12 px-4 sm:px-24 min-h-[42rem] sm:min-h-[37rem] min-w-[350px]
-            min-h-fit h-screen w-screen flex flex-1 flex-col items-center justify-around transition-all animate-fadeIn">
+        <div className="px-4 sm:px-24 min-h-[42rem] sm:min-h-[37rem] w-screen flex flex-1 flex-col items-center justify-around transition-all animate-fadeIn">
             <ProjectComponent
                 title='Drizzle (Yet Another Weather App)'
                 description='A weather app constructed with Next.JS.

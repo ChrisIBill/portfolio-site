@@ -8,8 +8,8 @@ export const metadata = {
 }
 export default function Home() {
     return (
-        <div className="box-border px-4 sm:px-24 min-h-[30rem] sm:min-h-[30rem] min-w-[350px]
-            min-h-fit h-screen w-screen flex flex-1 flex-col items-center justify-around animate-fadeIn">
+        <div className="box-border px-4 sm:px-24
+            min-h-fit w-screen flex flex-1 flex-col items-center justify-around animate-fadeIn">
             {/* <div className="pt-24 pb-12 px-4 sm:px-24 min-h-[22rem] sm:min-h-[22rem] h-screen min-w-350 w-screen  */}
             {/*     flex flex-col left-0 items-center"> */}
             <AboutSection />
