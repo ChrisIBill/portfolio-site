@@ -40,7 +40,7 @@ const NextHeader = () => {
                     "data-[active=true]:text-primary",
                 ],
             }}
-            className="absolute w-screen overflow-hidden px-0"
+            className="w-screen overflow-hidden px-0"
         >
             <NavbarBrand className="hidden md:flex text-default-900 min-w-fit min-h-fit">
                 {/* TODO: Logo */}
