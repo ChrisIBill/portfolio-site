@@ -1,3 +1,4 @@
+import { EXTRA_SMALL } from './src/lib/constants'
 import { nextui } from '@nextui-org/react'
 import type { Config } from 'tailwindcss'
 import defaultTheme from 'tailwindcss/defaultTheme'
@@ -12,7 +13,7 @@ const config: Config = {
     ],
     theme: {
         screens: {
-            'xs': '350px',
+            'xs': `${EXTRA_SMALL}px`,
             ...defaultTheme.screens,
         },
         extend: {
