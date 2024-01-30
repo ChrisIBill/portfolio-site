@@ -36,6 +36,14 @@ const config: Config = {
                     '0%': { transform: 'translateX(150%)' },
                     '100%': { transform: 'translateX(0)' },
                 },
+                slideOutLeft: {
+                    '0%': { transform: 'translateX(0)' },
+                    '100%': { transform: 'translateX(-150%)' },
+                },
+                slideOutRight: {
+                    '0%': { transform: 'translateX(0)' },
+                    '100%': { transform: 'translateX(150%)' },
+                },
                 wiggle: {
                     '0%, 100%': { transform: 'rotate(-3deg)' },
                     '50%': { transform: 'rotate(3deg)' },
@@ -49,6 +57,8 @@ const config: Config = {
                 fadeIn: 'fadeIn 1s ease-in-out',
                 slideInLeft: 'slideInLeft 1s ease-in-out',
                 slideInRight: 'slideInRight 1s ease-in-out',
+                slideOutLeft: 'slideOutLeft 1s ease-in-out',
+                slideOutRight: 'slideOutRight 1s ease-in-out',
                 wiggle: 'wiggle 1s ease-in-out infinite',
                 scaleUp: 'scaleUp 1s ease-in-out',
             },
