@@ -93,7 +93,7 @@ const NavBarMenuItems = (props: {
     }, [])
 
     if (!isClient)
-        return <ListMenuItems pathname={props.pathname} />
+        return <></>
     return lessThanXs ? <ListMenuItems pathname={props.pathname} />
         : <ContentMenuItems pathname={props.pathname} />
 }
