@@ -44,6 +44,23 @@ const NextHeader = () => {
                     "data-[active=true]:after:bg-primary",
                     "data-[active=true]:text-primary",
                 ],
+                menuItem: [
+                    "flex",
+                    "relative",
+                    "h-16",
+                    "bg-default-100",
+                    "items-center",
+                    "data-[active=true]:after:content-['']",
+                    "data-[active=true]:after:absolute",
+                    "data-[active=true]:after:bottom-0",
+                    "data-[active=true]:after:left-0",
+                    "data-[active=true]:after:right-0",
+                    "data-[active=true]:after:h-[2px]",
+                    "data-[active=true]:after:rounded-[2px]",
+                    "data-[active=true]:after:bg-primary",
+                    "data-[active=true]:text-primary",
+                    "data-[disabled=true]:text-default-900",
+                ]
             }}
             className="w-screen overflow-hidden px-0 h-16 flex-none"
         >

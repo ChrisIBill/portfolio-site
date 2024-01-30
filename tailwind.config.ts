@@ -62,6 +62,9 @@ const config: Config = {
     darkMode: 'class',
     plugins: [nextui({
         addCommonColors: true,
+        layout: {
+            disabledOpacity: 1.0,
+        }
     })],
 }
 export default config
