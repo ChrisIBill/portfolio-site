@@ -4,14 +4,15 @@ import { useEffect, useState } from "react";
 import "@theme-toggles/react/css/Classic.css"
 
 import { Classic } from "@theme-toggles/react";
+import logger from "@/lib/pino";
 
-
+const ThemeLogger = logger.child({ module: 'Theme' })
 const ThemeSwitcher = () => {
     const [mounted, setMounted] = useState(false)
     const { theme, setTheme } = useTheme()
 
     const handleThemeChange = () => {
-        console.log('theme changed: ' + theme)
+        ThemeLogger.info('theme changed: ' + theme)
         setTheme(theme === "dark" ? "light" : "dark")
     }
 
