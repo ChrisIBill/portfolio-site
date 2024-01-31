@@ -5,6 +5,7 @@ import { Providers } from '@/lib/providers'
 import Footer from './components/footer'
 import NextHeader from './components/header'
 import GoogleAnalytics from './google-analytics'
+import SwipeableLayer from './components/swipeable-layer'
 
 const font = Lato({ weight: '400', subsets: ['latin'] })
 
@@ -44,7 +45,10 @@ export default function RootLayout({
                 ) : null}
                 <Providers className='min-h-screen flex flex-col justify-between'>
                     <NextHeader />
-                    <main className={font.className + ' box-border'}>{children}</main>
+                    <SwipeableLayer className='flex-grow flex h-full'>
+                        <main className={font.className + ' box-border flex justify-center'}>{children}</main>
+                    </SwipeableLayer>
+                    <nav></nav>
                     <Footer />
                 </Providers>
             </body>
