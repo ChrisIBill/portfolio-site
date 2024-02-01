@@ -1,8 +1,10 @@
 'use client'
+
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import Draggable, { DraggableData, DraggableEventHandler } from "react-draggable"
 import logger from '@/lib/pino'
+import useScrollPosition from "@/lib/hooks/scroll-position"
 
 const SwipeableLayerLog = logger.child({ module: 'SwipeableLayer' })
 
@@ -22,23 +24,14 @@ type AnimateString =
 const SwipeableLayer = (props: { children: React.ReactNode, className?: string }) => {
     const pathname = usePathname()
     const searchParams = useSearchParams()
+    const { scrollPosition, maxScrollPosition, addToScroll } = useScrollPosition()
     const draggableRef = useRef(null)
     const [animate, setAnimate] = useState(false)
     const [animateString, setAnimateString] = useState('' as AnimateString)
     const [elemPos, setElemPos] = useState({ x: 0, y: 0 })
 
     const swipedRenderAnimation = useRef<AnimateString>('')
-    const resetSwipeState = () => {
-        SwipeableLayerLog.debug({
-            message: 'resetSwipeState',
-            animate,
-            animateString,
-            swipedRenderAnimation: swipedRenderAnimation.current,
-        })
-        setAnimate(true)
-        setAnimateString(swipedRenderAnimation.current)
-        setElemPos({ x: 0, y: 0 })
-    }
+
 
     const LeftPage = Pages.at((Pages.indexOf(pathname) - 1))
     const RightPage = Pages[(Pages.indexOf(pathname) + 1) % Pages.length]
@@ -52,10 +45,11 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
     )
 
     const handleDrag: DraggableEventHandler = (e, data: DraggableData) => {
-        const { x } = data
-        const width = window.innerWidth
+        SwipeableLayerLog.debug({ message: 'handleDrag', data, scrollPosition, maxScrollPosition })
+        if (maxScrollPosition && data.deltaY !== 0) addToScroll(-data.deltaY)
         setElemPos({ x: data.x, y: 0 })
     }
+
     const handleStop: DraggableEventHandler = (e, data: DraggableData) => {
         if (data.x > SWIPE_THRESHOLD) {
             SwipeableLayerLog.debug('user swiped right')
@@ -66,9 +60,9 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
             setAnimate(true)
             setAnimateString('animate-slideOutLeft')
         } else {
-            SwipeableLayerLog.debug('partial swipe, resetting')
+            SwipeableLayerLog.debug('user swiped partial, resetting')
             swipedRenderAnimation.current = ''
-            resetSwipeState()
+            setElemPos({ x: 0, y: 0 })
         }
     }
 
@@ -91,21 +85,32 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
     useEffect(() => {
         const url = `${pathname}${searchParams}`
         SwipeableLayerLog.debug('url: ' + url)
+        const resetSwipeState = () => {
+            SwipeableLayerLog.debug({
+                message: 'resetSwipeState',
+                animate,
+                animateString,
+                swipedRenderAnimation: swipedRenderAnimation.current,
+            })
+            setAnimate(true)
+            setAnimateString(swipedRenderAnimation.current)
+            setElemPos({ x: 0, y: 0 })
+        }
+
         resetSwipeState()
     }, [pathname, searchParams])
-
 
     return (
         <Draggable
             axis='x'
-            grid={[25, 25]}
+            //bounds={{ left: -100, right: 100 }}
             onDrag={handleDrag}
             onStop={handleStop}
             position={elemPos}
             nodeRef={draggableRef}
         >
             <div ref={draggableRef} className={props.className}>
-                <div className={'absolute top-0 left-0 w-full h-full flex justify-center items-center ' + (animate ? 'transition-all ' + animateString : '')}>
+                <div className={'top-0 left-0 w-full flex justify-center items-center transition-all duration-500 ' + (animate ? animateString : '')}>
                     {props.children}
                 </div>
             </div>
@@ -115,7 +120,9 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
 
 async function useDelayedRouterPush(href: string): Promise<() => void> {
     const router = useRouter()
-    router.prefetch(href)
+    useEffect(() => {
+        router.prefetch(href)
+    })
     return new Promise(
         resolve => {
             setTimeout(() => {

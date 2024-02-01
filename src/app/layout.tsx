@@ -37,7 +37,7 @@ export default function RootLayout({
     children: React.ReactNode
 }) {
     return (
-        <html lang="en" className='w-screen min-h-screen h-fit overflow-y-scroll overflow-x-scroll xs:overflow-x-hidden bg-default-200 dark:bg-default-800 transition-colors duration-400' suppressHydrationWarning>
+        <html lang="en" id='root' className='w-screen h-screen overflow-y-scroll overflow-x-scroll xs:overflow-x-hidden bg-default-200 dark:bg-default-800 transition-colors duration-400' suppressHydrationWarning>
             <body className='bg-transparent'>
                 {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS ? (
                     <GoogleAnalytics ga_id=
@@ -45,7 +45,7 @@ export default function RootLayout({
                 ) : null}
                 <Providers className='min-h-screen flex flex-col justify-between'>
                     <NextHeader />
-                    <SwipeableLayer className='flex-grow flex h-full'>
+                    <SwipeableLayer className='flex-grow flex'>
                         <main className={font.className + ' box-border flex justify-center'}>{children}</main>
                     </SwipeableLayer>
                     <nav></nav>
