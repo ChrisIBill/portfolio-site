@@ -67,7 +67,7 @@ const NextHeader = () => {
             <NavbarContent className="visible xs:invisible xs:w-0 gap-4 text-default-900" justify="start">
                 <NavbarMenuToggle className="text-default-900" />
             </NavbarContent>
-            <NavbarBrand className="hidden md:flex text-default-900">
+            <NavbarBrand className="hidden text-default-900">
                 {/* TODO: Logo */}
             </NavbarBrand>
             <DynamicNavbarMenu pathname={pathname} />
