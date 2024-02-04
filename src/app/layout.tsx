@@ -37,8 +37,8 @@ export default function RootLayout({
     children: React.ReactNode
 }) {
     return (
-        <html lang="en" id='root' className='w-screen h-screen overflow-y-scroll overflow-x-scroll xs:overflow-x-hidden bg-default-200 dark:bg-default-800 transition-colors duration-400' suppressHydrationWarning>
-            <body className='bg-transparent'>
+        <html lang="en" id='root' className='bg-transparent overflow-hidden' suppressHydrationWarning>
+            <body id='scrollable' className='w-screen h-screen overflow-y-scroll overflow-x-scroll xs:overflow-x-hidden bg-default-200 dark:bg-default-800 transition-colors duration-400'>
                 {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS ? (
                     <GoogleAnalytics ga_id=
                         {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS} />

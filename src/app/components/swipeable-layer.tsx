@@ -45,8 +45,8 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
     )
 
     const handleDrag: DraggableEventHandler = (e, data: DraggableData) => {
-        SwipeableLayerLog.debug({ message: 'handleDrag', data, scrollPosition, maxScrollPosition })
-        if (maxScrollPosition && data.deltaY !== 0) addToScroll(-data.deltaY)
+        SwipeableLayerLog.debug({ message: 'handleDrag', deltaY: data.deltaY, scrollPosition, maxScrollPosition })
+        addToScroll(-data.deltaY)
         setElemPos({ x: data.x, y: 0 })
     }
 
@@ -110,7 +110,7 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
             nodeRef={draggableRef}
         >
             <div ref={draggableRef} className={props.className}>
-                <div className={'top-0 left-0 w-full flex justify-center items-center transition-all duration-500 ' + (animate ? animateString : '')}>
+                <div className={'top-0 left-0 w-full flex justify-center items-center transition-all duration-300 ' + (animate ? animateString : '')}>
                     {props.children}
                 </div>
             </div>
