@@ -26,6 +26,7 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
     const searchParams = useSearchParams()
     const { scrollPosition, maxScrollPosition, addToScroll } = useScrollPosition()
     const draggableRef = useRef(null)
+    const [disabled, setDisabled] = useState(false)
     const [animate, setAnimate] = useState(false)
     const [animateString, setAnimateString] = useState('' as AnimateString)
     const [elemPos, setElemPos] = useState({ x: 0, y: 0 })
@@ -43,6 +44,15 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
     const delayedRouterPushRight = useDelayedRouterPush(
         RightPage,
     )
+
+    const mouseEventControl = async (e: React.MouseEvent, data: DraggableData) => {
+        console.log('mouseEventControl', e, data)
+        if (e.type === 'mousedown' || e.type === 'touchstart') {
+
+        } else if (e.type === 'mouseup' || e.type === 'touchend') {
+            SwipeableLayerLog.debug('mouseup')
+        }
+    }
 
     const handleDrag: DraggableEventHandler = (e, data: DraggableData) => {
         SwipeableLayerLog.debug({ message: 'handleDrag', deltaY: data.deltaY, scrollPosition, maxScrollPosition })
@@ -104,6 +114,8 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
         <Draggable
             axis='x'
             //bounds={{ left: -100, right: 100 }}
+            onMouseDown={mouseEventControl}
+            disabled={disabled}
             onDrag={handleDrag}
             onStop={handleStop}
             position={elemPos}
