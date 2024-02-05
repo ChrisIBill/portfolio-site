@@ -60,11 +60,11 @@ const ProjectComponent: React.FC<ProjectComponentProps> = (props) => {
                 <div className='flex'>
                     <span className={`flex mx-2 ${props.url ? '' : 'my-2'}`}>
                         <IoLogoGithub className='h-full text-default-900 self-center mx-2' />
-                        <Link href={props.githubURL}>Github</Link>
+                        <Link underline='hover' href={props.githubURL}>Github</Link>
                     </span>
                     {props.url && <span className="flex m-2">
                         <PiGlobeBold className='h-full text-default-900 self-center mx-2' />
-                        <Link href={props.url}>Live</Link>
+                        <Link underline='hover' href={props.url}>Live</Link>
                     </span>}
                 </div>
             </div>
