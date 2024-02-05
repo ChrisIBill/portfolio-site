@@ -1,13 +1,16 @@
 'use client'
 import { RefObject, useEffect, useRef, useState } from "react"
 import logger from "../pino"
+import { debounce } from 'lodash'
 
 const ScrollPositionLog = logger.child({ module: 'scroll-position' })
 
 export default function useScrollPosition() {
-    const scrollRef = useRef < HTMLElement | null > (null)
+    const scrollRef = useRef<HTMLElement | null>(null)
     const [scrollPosition, setScrollPosition] = useState(0)
-    const scrollToRef = useRef < number | null > (null)
+    const scrollToRef = useRef<number | undefined>(undefined)
+    const [overScroll, setOverScroll] = useState(0)
+    const overScrollRef = useRef<number>(0)
     const maxScrollPosition = getMaxScrollPosition(scrollRef)
 
     async function addToScroll(amount: number) {
@@ -15,17 +18,22 @@ export default function useScrollPosition() {
             ScrollPositionLog.error({ message: 'scrollRef.current not found' })
             return
         }
-        if (scrollToRef.current === null) scrollToRef.current = scrollPosition + amount
+        if (!scrollToRef.current) scrollToRef.current = scrollPosition + amount
         else scrollToRef.current += amount
 
-        scrollToRef.current = Math.min(scrollToRef.current, maxScrollPosition || 0)
-        scrollToRef.current = Math.max(scrollToRef.current, 0)
-        ScrollPositionLog.debug({ message: 'addToScroll', scrollTo: scrollToRef.current, scrollRef: scrollRef.current })
-        scrollRef.current?.scrollTo({ top: scrollToRef.current, behavior: 'auto' })
+        scrollToRef.current = Math.max(Math.min(scrollToRef.current, maxScrollPosition || 0), 0)
+        ScrollPositionLog.debug({ message: 'addToScroll', scrollTo, scrollToRef: scrollToRef.current, scrollRef: scrollRef.current })
+        setTimeout(() => scrollRef.current?.scrollTo({ top: scrollToRef.current, behavior: 'smooth' }))
         setScrollPosition(scrollToRef.current)
+    }
+    const resetOverScroll = () => {
+        overScrollRef.current = 0
+        setOverScroll(0)
     }
 
     useEffect(() => {
+        const resScroll = debounce(resetOverScroll, 300)
+
         if (!scrollRef.current) {
             scrollRef.current = document.getElementById('scrollable')
             if (!scrollRef.current) {
@@ -33,17 +41,41 @@ export default function useScrollPosition() {
                 return
             }
         }
-        const handleScroll = () => {
+        const handleScroll = (e: Event) => {
+            ScrollPositionLog.debug({ message: 'scrolling', scrollPos: scrollRef.current?.scrollTop || 0 })
             setScrollPosition(scrollRef.current?.scrollTop || 0)
         }
+        const handleWheel = async (e: WheelEvent) => {
+            if (!scrollRef.current) return
+            else if (scrollPosition <= 0 || scrollPosition >= (maxScrollPosition || 0)) {
+                if (scrollPosition <= 0 && e.deltaY < 0) {
+                    overScrollRef.current += -10
+                    ScrollPositionLog.debug({ message: 'overScroll neg', overScroll: overScrollRef.current })
+                    setOverScroll(overScrollRef.current)
+                    resScroll()
+                } else if (scrollPosition >= (maxScrollPosition || 0) && e.deltaY > 0) {
+                    overScrollRef.current += 10
+                    ScrollPositionLog.debug({ message: 'overScroll pos', overScroll: overScrollRef.current })
+                    setOverScroll(overScrollRef.current)
+                    resScroll()
+                }
+            } else {
+                overScrollRef.current = 0
+                setOverScroll(0)
+            }
+        }
         scrollRef.current.addEventListener('scroll', handleScroll)
-        return () => scrollRef.current?.removeEventListener('scroll', handleScroll)
-    }, [scrollRef])
+        scrollRef.current.addEventListener('wheel', handleWheel)
+        return () => {
+            scrollRef.current?.removeEventListener('scroll', handleScroll)
+            scrollRef.current?.removeEventListener('wheel', handleWheel)
+        }
+    }, [scrollRef, scrollPosition])
 
     return {
-        scrollPosition,
-        maxScrollPosition,
         addToScroll,
+        overScroll,
+        resetOverScroll,
     }
 }
 

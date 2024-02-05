@@ -2,13 +2,16 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
-import Draggable, { DraggableData, DraggableEventHandler } from "react-draggable"
 import logger from '@/lib/pino'
-import useScrollPosition from "@/lib/hooks/scroll-position"
+import useScrollPosition from '@/lib/hooks/scroll-position'
+import { useSwipeable } from "react-swipeable"
 
 const SwipeableLayerLog = logger.child({ module: 'SwipeableLayer' })
 
+
 const SWIPE_THRESHOLD = 50
+
+
 const Pages: Array<string> = [
     "/",
     "/about",
@@ -24,13 +27,10 @@ type AnimateString =
 const SwipeableLayer = (props: { children: React.ReactNode, className?: string }) => {
     const pathname = usePathname()
     const searchParams = useSearchParams()
-    const { scrollPosition, maxScrollPosition, addToScroll } = useScrollPosition()
-    const draggableRef = useRef(null)
-    const [disabled, setDisabled] = useState(false)
+    const { addToScroll, overScroll, resetOverScroll } = useScrollPosition()
     const [animate, setAnimate] = useState(false)
     const [animateString, setAnimateString] = useState('' as AnimateString)
     const [elemPos, setElemPos] = useState({ x: 0, y: 0 })
-
     const swipedRenderAnimation = useRef<AnimateString>('')
 
 
@@ -45,45 +45,54 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
         RightPage,
     )
 
-    const mouseEventControl = async (e: React.MouseEvent, data: DraggableData) => {
-        console.log('mouseEventControl', e, data)
-        if (e.type === 'mousedown' || e.type === 'touchstart') {
-
-        } else if (e.type === 'mouseup' || e.type === 'touchend') {
-            SwipeableLayerLog.debug('mouseup')
-        }
-    }
-
-    const handleDrag: DraggableEventHandler = (e, data: DraggableData) => {
-        SwipeableLayerLog.debug({ message: 'handleDrag', deltaY: data.deltaY, scrollPosition, maxScrollPosition })
-        addToScroll(-data.deltaY)
-        setElemPos({ x: data.x, y: 0 })
-    }
-
-    const handleStop: DraggableEventHandler = (e, data: DraggableData) => {
-        if (data.x > SWIPE_THRESHOLD) {
-            SwipeableLayerLog.debug('user swiped right')
-            setAnimate(true)
-            setAnimateString('animate-slideOutRight')
-        } else if (data.x < -SWIPE_THRESHOLD) {
+    const swipeHandlers = useSwipeable({
+        onSwipedLeft: () => {
             SwipeableLayerLog.debug('user swiped left')
             setAnimate(true)
             setAnimateString('animate-slideOutLeft')
-        } else {
-            SwipeableLayerLog.debug('user swiped partial, resetting')
-            swipedRenderAnimation.current = ''
+        },
+        onSwipedRight: () => {
+            SwipeableLayerLog.debug('user swiped right')
+            setAnimate(true)
+            setAnimateString('animate-slideOutRight')
+        },
+        onSwiping: (e) => {
+            SwipeableLayerLog.debug('onSwiping', e)
+            setElemPos({ x: e.deltaX, y: 0 })
+            addToScroll(-e.deltaY)
+        },
+        onSwiped: (e) => {
+            SwipeableLayerLog.debug('onSwiped', e)
             setElemPos({ x: 0, y: 0 })
+        },
+        delta: SWIPE_THRESHOLD,
+        preventScrollOnSwipe: false,
+        trackTouch: true,
+        trackMouse: false,
+        swipeDuration: Infinity,
+    })
+
+    useEffect(() => {
+        setElemPos({ x: overScroll, y: 0 })
+        if (overScroll >= 50) {
+            setAnimate(true)
+            setAnimateString('animate-slideOutRight')
+        } else if (overScroll <= -50) {
+            setAnimate(true)
+            setAnimateString('animate-slideOutLeft')
         }
-    }
+    }, [overScroll])
 
     useEffect(() => {
         if (animateString === 'animate-slideOutLeft') {
+            SwipeableLayerLog.debug('Sliding To Left')
             delayedRouterPushRight.then(
                 (fn) => fn()
             ).catch(onrejected => SwipeableLayerLog.error(onrejected)).finally(() => {
                 swipedRenderAnimation.current = 'animate-slideInRight'
             })
         } else if (animateString === 'animate-slideOutRight') {
+            SwipeableLayerLog.debug('Sliding To Right')
             delayedRouterPushLeft.then(
                 (fn) => fn()
             ).catch(onrejected => SwipeableLayerLog.error(onrejected)).finally(() => {
@@ -105,28 +114,27 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
             setAnimate(true)
             setAnimateString(swipedRenderAnimation.current)
             setElemPos({ x: 0, y: 0 })
+            resetOverScroll()
         }
 
         resetSwipeState()
     }, [pathname, searchParams])
 
     return (
-        <Draggable
-            axis='x'
-            //bounds={{ left: -100, right: 100 }}
-            onMouseDown={mouseEventControl}
-            disabled={disabled}
-            onDrag={handleDrag}
-            onStop={handleStop}
-            position={elemPos}
-            nodeRef={draggableRef}
+        <div
+            className={props.className}
+            id='draggable'
+            {...swipeHandlers}
+            style={{
+                position: 'relative',
+                left: elemPos.x,
+                top: elemPos.y,
+            }}
         >
-            <div ref={draggableRef} className={props.className}>
-                <div className={'top-0 left-0 w-full flex justify-center items-center transition-all duration-300 ' + (animate ? animateString : '')}>
-                    {props.children}
-                </div>
+            <div className={'top-0 left-0 w-full flex justify-center items-center transition-all duration-300 ' + (animate ? animateString : '')}>
+                {props.children}
             </div>
-        </Draggable>
+        </div>
     )
 }
 

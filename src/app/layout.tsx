@@ -45,8 +45,8 @@ export default function RootLayout({
                 ) : null}
                 <Providers className='min-h-screen flex flex-col justify-between'>
                     <NextHeader />
-                    <SwipeableLayer className='flex-grow flex'>
-                        <main className={font.className + ' box-border flex justify-center'}>{children}</main>
+                    <SwipeableLayer className='relative z-0 flex-grow flex'>
+                        <main className={font.className + ' relative z-10 box-border flex justify-center'}>{children}</main>
                     </SwipeableLayer>
                     <nav></nav>
                     <Footer />
