@@ -4,7 +4,7 @@
         <loc>https://www.christopher-billingham.dev</loc>
         <lastmod>2024-02-05</lastmod>
         <changefreq>hourly</changefreq>
-        <priority>0</priority>
+        <priority>0.1</priority>
     </url>
     <url>
         <loc>https://www.christopher-billingham.dev/about</loc>

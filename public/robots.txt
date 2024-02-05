@@ -1,4 +1,5 @@
-# Allow all crawlers
+# Disallow all crawlers
 User-agent: *
+Allow: /sitemap.xml
 Disallow: /
-```
+Sitemap: https://www.christopher-billingham.com/sitemap.xml
