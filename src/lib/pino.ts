@@ -7,14 +7,11 @@ const config = {
 }
 const send = (level: any, logEvent: { messages: any[] }) => {
     const msg = logEvent.messages[0]
-
     const headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
         type: 'application/json'
     }
-    let blob = new Blob([JSON.stringify({ msg, level })], headers)
-    navigator.sendBeacon(`${config.serverUrl}/log`, blob)
 }
 
 const pinoConfig = {
@@ -22,7 +19,7 @@ const pinoConfig = {
         asObject: true,
         serialize: true,
         transmit: {
-            level: 'info',
+            level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
             send: send
         }
     }
@@ -30,12 +27,11 @@ const pinoConfig = {
 
 if (config.serverUrl) {
     pinoConfig.browser.transmit = {
-        level: 'info',
+        level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
         send: send
     }
 }
 
-const logger = pino(pinoConfig)
+export const logger = pino(pinoConfig)
 
-export const log = (msg: any) => logger.info(msg)
 export default logger

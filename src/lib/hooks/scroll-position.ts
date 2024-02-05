@@ -1,7 +1,7 @@
 'use client'
 import { RefObject, useEffect, useRef, useState } from "react"
 import logger from "../pino"
-import { debounce } from 'lodash'
+import { debounce } from "lodash"
 
 const ScrollPositionLog = logger.child({ module: 'scroll-position' })
 
