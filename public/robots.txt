@@ -1,6 +1,6 @@
 # Disallow all crawlers
 User-agent: *
-Disallow: /
+Allow: /
 
 User-agent: *
 Allow: /sitemap.xml
