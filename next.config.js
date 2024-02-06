@@ -3,7 +3,7 @@ const nextConfig = {
     async headers() {
         return [
             {
-                source: '/',
+                source: '/:slug*',
                 headers: [
                     {
                         key: 'X-Robots-Tag',
