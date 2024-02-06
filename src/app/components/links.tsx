@@ -31,7 +31,7 @@ export const SiteLinks = [
     },
     {
         icon: <IoLogoLinkedin className='h-full text-inherit self-center' />,
-        link: 'https://www.linkedin.com/in/christopher-billingham-7781a1180/',
+        link: 'https://www.linkedin.com/in/christopher-billingham/',
         text: 'LinkedIn',
         label: 'Link to my LinkedIn',
         isExternal: true,
