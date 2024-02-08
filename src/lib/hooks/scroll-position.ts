@@ -1,16 +1,16 @@
 'use client'
 import { RefObject, useEffect, useRef, useState } from "react"
 import logger from "../pino"
-import { debounce } from "lodash"
+import { debounce } from 'lodash'
 
 const ScrollPositionLog = logger.child({ module: 'scroll-position' })
 
 export default function useScrollPosition() {
-    const scrollRef = useRef<HTMLElement | null>(null)
+    const scrollRef = useRef < HTMLElement | null > (null)
     const [scrollPosition, setScrollPosition] = useState(0)
-    const scrollToRef = useRef<number | undefined>(undefined)
+    const scrollToRef = useRef < number | undefined > (undefined)
     const [overScroll, setOverScroll] = useState(0)
-    const overScrollRef = useRef<number>(0)
+    const overScrollRef = useRef < number > (0)
     const maxScrollPosition = getMaxScrollPosition(scrollRef)
 
     async function addToScroll(amount: number) {

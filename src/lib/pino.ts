@@ -4,6 +4,7 @@ const config = {
     serverUrl: process.env.REACT_APP_API_PATH || 'http://localhost:3000',
     env: process.env.NODE_ENV,
     publicUrl: process.env.PUBLIC_URL,
+    level: process.env.NEXT_PUBLIC_PINO_LOG_LEVEL || 'info'
 }
 const send = (level: any, logEvent: { messages: any[] }) => {
     const msg = logEvent.messages[0]
@@ -18,19 +19,11 @@ const pinoConfig = {
     browser: {
         asObject: true,
         serialize: true,
-        transmit: {
-            level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-            send: send
-        }
     }
 }
 
-if (config.serverUrl) {
-    pinoConfig.browser.transmit = {
-        level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-        send: send
-    }
-}
+//if (config.serverUrl) {
+//}
 
 export const logger = pino(pinoConfig)
 

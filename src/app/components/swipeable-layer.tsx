@@ -1,6 +1,6 @@
 'use client'
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import logger from '@/lib/pino'
 import useScrollPosition from '@/lib/hooks/scroll-position'
@@ -26,13 +26,12 @@ type AnimateString =
     | ''
 const SwipeableLayer = (props: { children: React.ReactNode, className?: string }) => {
     const pathname = usePathname()
-    const searchParams = useSearchParams()
+    const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').toString()
     const { addToScroll, overScroll, resetOverScroll } = useScrollPosition()
     const [animate, setAnimate] = useState(false)
-    const [animateString, setAnimateString] = useState('' as AnimateString)
+    const [animateString, setAnimateString] = useState < AnimateString > ('')
     const [elemPos, setElemPos] = useState({ x: 0, y: 0 })
-    const swipedRenderAnimation = useRef<AnimateString>('')
-
+    const swipedRenderAnimation = useRef < AnimateString > ('')
 
     const LeftPage = Pages.at((Pages.indexOf(pathname) - 1))
     const RightPage = Pages[(Pages.indexOf(pathname) + 1) % Pages.length]
@@ -45,14 +44,32 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
         RightPage,
     )
 
+    const resetSwipeState = () => {
+        SwipeableLayerLog.debug({
+            message: 'resetSwipeState',
+            animate,
+
+        })
+        setAnimate(true)
+        setAnimateString(swipedRenderAnimation.current)
+        setElemPos({ x: 0, y: 0 })
+        resetOverScroll()
+    }
+
     const swipeHandlers = useSwipeable({
-        onSwipedLeft: () => {
-            SwipeableLayerLog.debug('user swiped left')
-            setAnimate(true)
-            setAnimateString('animate-slideOutLeft')
+        onSwipedLeft: (e) => {
+            SwipeableLayerLog.debug({ message: 'user swiped left', e })
+            if (e.deltaX < -SWIPE_THRESHOLD) {
+                setAnimate(true)
+                setAnimateString('animate-slideOutLeft')
+            }
         },
-        onSwipedRight: () => {
-            SwipeableLayerLog.debug('user swiped right')
+        onSwipedRight: (e) => {
+            SwipeableLayerLog.debug({ message: 'user swiped right', e })
+            if (e.deltaX > SWIPE_THRESHOLD) {
+                setAnimate(true)
+                setAnimateString('animate-slideOutRight')
+            }
             setAnimate(true)
             setAnimateString('animate-slideOutRight')
         },
@@ -63,9 +80,12 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
         },
         onSwiped: (e) => {
             SwipeableLayerLog.debug('onSwiped', e)
-            setElemPos({ x: 0, y: 0 })
+            if (e.deltaX > -SWIPE_THRESHOLD && e.deltaX < SWIPE_THRESHOLD) {
+                setElemPos({ x: 0, y: 0 })
+                setAnimate(false)
+            }
         },
-        delta: SWIPE_THRESHOLD,
+        delta: 10,
         preventScrollOnSwipe: false,
         trackTouch: true,
         trackMouse: false,
@@ -73,11 +93,11 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
     })
 
     useEffect(() => {
-        setElemPos({ x: overScroll, y: 0 })
-        if (overScroll >= 50) {
+        setElemPos({ x: overScroll * -1, y: 0 })
+        if (overScroll <= -50) {
             setAnimate(true)
             setAnimateString('animate-slideOutRight')
-        } else if (overScroll <= -50) {
+        } else if (overScroll >= 50) {
             setAnimate(true)
             setAnimateString('animate-slideOutLeft')
         }
@@ -104,18 +124,7 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
     useEffect(() => {
         const url = `${pathname}${searchParams}`
         SwipeableLayerLog.debug('url: ' + url)
-        const resetSwipeState = () => {
-            SwipeableLayerLog.debug({
-                message: 'resetSwipeState',
-                animate,
-                animateString,
-                swipedRenderAnimation: swipedRenderAnimation.current,
-            })
-            setAnimate(true)
-            setAnimateString(swipedRenderAnimation.current)
-            setElemPos({ x: 0, y: 0 })
-            resetOverScroll()
-        }
+
 
         resetSwipeState()
     }, [pathname, searchParams])

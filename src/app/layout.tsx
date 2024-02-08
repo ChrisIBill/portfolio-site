@@ -18,9 +18,13 @@ export const metadata: Metadata = {
     authors: { name: 'Christopher Billingham' },
     creator: 'Christopher Billingham',
     publisher: 'Christopher Billingham',
-    robots: 'all',
-    keywords: 'portfolio, website, web development, software engineering, react, next.js, tailwind css, chris billingham, christopher billingham, tailwind, full stack, full stack engineer, web developer, developer, javascript, typescript, .net, c-sharp, c#, vite, front end, front end developer',
-    metadataBase: new URL('https://christopher-billingham.com'),
+    robots: {
+        index: true,
+        follow: true,
+        nocache: false,
+    },
+    keywords: 'chris billingham, chris, christopher, billingham, portfolio, website, web development, software engineering, react, next.js, tailwind css, chris billingham, christopher billingham, tailwind, full stack, full stack engineer, web developer, developer, javascript, typescript, .net, c-sharp, c#, vite, front end, front end developer',
+    metadataBase: new URL('https://www.christopher-billingham.com'),
     alternates: {
         canonical: '/',
     },
@@ -38,20 +42,26 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en" id='root' className='bg-transparent overflow-hidden' suppressHydrationWarning>
-            <body id='scrollable' className='w-screen h-screen overflow-y-scroll overflow-x-scroll xs:overflow-x-hidden bg-default-200 dark:bg-default-800 transition-colors duration-400'>
-                {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS ? (
-                    <GoogleAnalytics ga_id=
-                        {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS} />
-                ) : null}
-                <Providers className='min-h-screen flex flex-col justify-between'>
-                    <NextHeader />
-                    <SwipeableLayer className='relative z-0 flex-grow flex'>
-                        <main className={font.className + ' relative z-10 box-border flex justify-center'}>{children}</main>
-                    </SwipeableLayer>
-                    <nav></nav>
-                    <Footer />
-                </Providers>
+            <body id='scrollable' className='w-screen h-screen overflow-y-scroll overflow-x-scroll xs:overflow-x-hidden'>
+                <div id='background-layer-light' className='background-layer transition-colors before:bg-gradient-to-b dark:before:from-default-200 dark:before:to-default-300 before:from-default-800 before:to-default-700 before:opacity-0 dark:before:opacity-100'>
+                    <div id='background-layer-dark' className='background-layer transition-colors before:bg-gradient-to-b before:from-default-200 before:to-default-300 dark:before:from-default-800 dark:before:to-default-700 dark:before:opacity-0 before:opacity-100'>
+                        {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS ? (
+                            <GoogleAnalytics ga_id=
+                                {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS} />
+                        ) : null}
+                        <Providers className='absolute z-10 min-h-screen flex flex-col justify-between opacity-100 visible'>
+                            <NextHeader />
+                            <SwipeableLayer className='relative z-5 flex-grow flex'>
+                                <main className={font.className + ' relative z-10 box-border flex justify-center'}>{children}</main>
+                            </SwipeableLayer>
+                            <nav></nav>
+                            <Footer />
+                        </Providers>
+                    </div>
+                </div>
             </body>
-        </html>
+        </html >
     )
 }
+//bg-gradient-to-b from-default-200 to-default-300 dark:from-default-800 dark:to-default-700
+//light:before:from-default-800 light:before:to-default-700

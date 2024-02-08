@@ -6,17 +6,28 @@ import "@theme-toggles/react/css/Classic.css"
 import { Classic } from "@theme-toggles/react";
 import logger from "@/lib/pino";
 
+type ThemeType = "dark" | "light"
 const ThemeLogger = logger.child({ module: 'Theme' })
 const ThemeSwitcher = () => {
     const [mounted, setMounted] = useState(false)
     const { theme, setTheme } = useTheme()
 
     const handleThemeChange = () => {
-        ThemeLogger.info('theme changed: ' + theme)
-        setTheme(theme === "dark" ? "light" : "dark")
+        const newTheme = theme === "dark" ? "light" : "dark"
+        ThemeLogger.info('theme changed: ' + newTheme)
+        setTheme(newTheme)
+        localStorage.setItem('theme', newTheme)
+        document.documentElement.classList.toggle('dark')
     }
 
     useEffect(() => {
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            setTheme('dark')
+            document.documentElement.classList.add('dark')
+        } else {
+            setTheme('light')
+            document.documentElement.classList.remove('dark')
+        }
         setMounted(true)
     }, [])
 
