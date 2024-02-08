@@ -29,10 +29,9 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
     const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').toString()
     const { addToScroll, overScroll, resetOverScroll } = useScrollPosition()
     const [animate, setAnimate] = useState(false)
-    const [animateString, setAnimateString] = useState('' as AnimateString)
+    const [animateString, setAnimateString] = useState < AnimateString > ('')
     const [elemPos, setElemPos] = useState({ x: 0, y: 0 })
-    const swipedRenderAnimation = useRef<AnimateString>('')
-
+    const swipedRenderAnimation = useRef < AnimateString > ('')
 
     const LeftPage = Pages.at((Pages.indexOf(pathname) - 1))
     const RightPage = Pages[(Pages.indexOf(pathname) + 1) % Pages.length]
@@ -125,6 +124,7 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
     useEffect(() => {
         const url = `${pathname}${searchParams}`
         SwipeableLayerLog.debug('url: ' + url)
+
 
         resetSwipeState()
     }, [pathname, searchParams])
