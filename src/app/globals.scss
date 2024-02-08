@@ -27,6 +27,24 @@ header {
     padding-right: 0;
 }
 
+.background-layer {
+    position: relative;
+    transition: opacity 0.5s linear;
+    width: 100vw;
+    height: 100vh;
+}
+
+.background-layer::before {
+    position: absolute;
+    content: '';
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+    transition: opacity 0.5s linear;
+}
+
 .pagination-button {
     position: relative;
 
