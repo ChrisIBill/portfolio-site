@@ -3,6 +3,7 @@
 import { Pagination, PaginationItemType, cn, usePagination } from "@nextui-org/react";
 import React from "react";
 import { SiteLinks } from '@/app/components/links'
+import { FaChevronRight as ChevronRight, FaChevronLeft as ChevronLeft } from "react-icons/fa";
 
 
 export default function CustomPagination() {
@@ -19,21 +20,17 @@ export default function CustomPagination() {
     }: any) => {
         if (value === PaginationItemType.NEXT) {
             return (
-                <>
-                    {/* <button key={key} className={cn(className, "bg-default-700 min-w-8 w-8 h-8")} onClick={onNext}> */}
-                    {/* <ChevronIcon className="rotate-180" /> */}
-                    {/* </button> */}
-                </>
+                <button key={key} className={cn("min-w-8 w-8 h-8", className)} onClick={onNext}>
+                    <ChevronRight className='text-default-900' />
+                </button>
             );
         }
 
         if (value === PaginationItemType.PREV) {
             return (
-                <>
-                    {/* <button key={key} className={cn(className, "bg-default-700 min-w-8 w-8 h-8")} onClick={onPrevious}> */}
-                    {/* <ChevronIcon /> */}
-                    {/* </button> */}
-                </>
+                <button key={key} className={cn(className, "min-w-8 w-8 h-8")} onClick={onPrevious}>
+                    <ChevronLeft className='text-default-900' />
+                </button>
             );
         }
 
@@ -48,9 +45,9 @@ export default function CustomPagination() {
                 ref={ref}
                 className={cn(
                     className,
-                    "pagination-button bg-gradient-to-br from-indigo-500 to-pink-500 ",
+                    "pagination-button bg-gradient-to-br from-blue-500 to-purple-600 before:bg-default-900 before:opacity-0",
                     !isActive &&
-                    "before:bg-default-900 before:opacity-50",
+                    "before:opacity-50",
                     isActive &&
                     "text-white font-bold",
                 )}
@@ -64,9 +61,12 @@ export default function CustomPagination() {
         <Pagination
             disableCursorAnimation
             showControls
+            // currentPage={currentPage}
+            // onChange={(page) => setPage(page)}
+            loop
             total={3}
             initialPage={1}
-            className="gap-2"
+            className="flex justify-center gap-2"
             radius="full"
             renderItem={renderItem}
             variant="light"
