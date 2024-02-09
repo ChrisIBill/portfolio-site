@@ -70,8 +70,6 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
                 setAnimate(true)
                 setAnimateString('animate-slideOutRight')
             }
-            setAnimate(true)
-            setAnimateString('animate-slideOutRight')
         },
         onSwiping: (e) => {
             SwipeableLayerLog.debug('onSwiping', e)
