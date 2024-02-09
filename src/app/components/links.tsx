@@ -7,6 +7,23 @@ export interface SiteLinkType {
     label: string
     isExternal: boolean
 }
+
+
+export const InternalLinks = [
+    '/',
+    '/about',
+    '/projects',
+] as const
+export type InternalLinkType = typeof InternalLinks[number]
+export type InternalLinksType = typeof InternalLinks
+export const ExternalLinks = [
+    'https://www.linkedin.com/in/christopher-billingham/',
+    'https://www.github.com/ChrisIBill',
+] as const
+export type ExternalLinkType = typeof ExternalLinks[number]
+export const AllLinks = [...InternalLinks, ...ExternalLinks] as const
+export type AllLinkType = typeof AllLinks[number]
+
 export const SiteLinks = [
     {
         icon: <IoHome className='h-full text-inherit self-center' />,
