@@ -16,6 +16,10 @@ const send = (level: any, logEvent: { messages: any[] }) => {
 }
 
 const pinoConfig = {
+    serverUrl: process.env.REACT_APP_API_PATH || 'http://localhost:3000',
+    env: process.env.NODE_ENV,
+    publicUrl: process.env.PUBLIC_URL,
+    level: process.env.NEXT_PUBLIC_PINO_LOG_LEVEL || 'info',
     browser: {
         asObject: true,
         serialize: true,

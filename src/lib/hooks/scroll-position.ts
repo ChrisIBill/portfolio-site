@@ -6,11 +6,11 @@ import { debounce } from 'lodash'
 const ScrollPositionLog = logger.child({ module: 'scroll-position' })
 
 export default function useScrollPosition() {
-    const scrollRef = useRef < HTMLElement | null > (null)
+    const scrollRef = useRef<HTMLElement | null>(null)
     const [scrollPosition, setScrollPosition] = useState(0)
-    const scrollToRef = useRef < number | undefined > (undefined)
+    const scrollToRef = useRef<number | undefined>(undefined)
     const [overScroll, setOverScroll] = useState(0)
-    const overScrollRef = useRef < number > (0)
+    const overScrollRef = useRef<number>(0)
     const maxScrollPosition = getMaxScrollPosition(scrollRef)
 
     async function addToScroll(amount: number) {
@@ -40,9 +40,10 @@ export default function useScrollPosition() {
                 ScrollPositionLog.error({ message: 'scrollRef.current not found' })
                 return
             }
+            ScrollPositionLog.debug({ message: 'scrollRef.current found', scrollRef: scrollRef.current })
         }
         const handleScroll = (e: Event) => {
-            ScrollPositionLog.debug({ message: 'scrolling', scrollPos: scrollRef.current?.scrollTop || 0 })
+            ScrollPositionLog.debug({ message: 'scrolling', e, scrollPos: scrollRef.current?.scrollTop || 0 })
             setScrollPosition(scrollRef.current?.scrollTop || 0)
         }
         const handleWheel = async (e: WheelEvent) => {
