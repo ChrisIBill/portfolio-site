@@ -10,7 +10,7 @@ export const metadata = {
 export default function Home() {
 
     return (
-        <div className="relative px-4 sm:px-24 top-4 left-0 h-fit min-w-fit w-screen flex-1 flex-col items-center justify-between">
+        <div className="relative box-border px-4 sm:px-24 top-4 left-0 h-fit min-w-fit w-screen flex-1 flex-col items-center justify-between">
             <BioComponent />
         </div>
     )

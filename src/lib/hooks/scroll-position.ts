@@ -40,22 +40,22 @@ export default function useScrollPosition() {
                 ScrollPositionLog.error({ message: 'scrollRef.current not found' })
                 return
             }
+            ScrollPositionLog.debug({ message: 'scrollRef.current found', scrollRef: scrollRef.current })
         }
         const handleScroll = (e: Event) => {
             ScrollPositionLog.debug({ message: 'scrolling', scrollPos: scrollRef.current?.scrollTop || 0 })
             setScrollPosition(scrollRef.current?.scrollTop || 0)
         }
         const handleWheel = async (e: WheelEvent) => {
-            if (!scrollRef.current) return
-            else if (scrollPosition <= 0 || scrollPosition >= (maxScrollPosition || 0)) {
+            if (scrollPosition <= 0 || scrollPosition >= (maxScrollPosition || 0)) {
                 if (scrollPosition <= 0 && e.deltaY < 0) {
                     overScrollRef.current += -10
-                    ScrollPositionLog.debug({ message: 'overScroll neg', overScroll: overScrollRef.current })
+                    ScrollPositionLog.debug({ message: 'overScroll neg', overScroll: overScrollRef.current, scrollPosition, deltaY: e.deltaY })
                     setOverScroll(overScrollRef.current)
                     resScroll()
                 } else if (scrollPosition >= (maxScrollPosition || 0) && e.deltaY > 0) {
                     overScrollRef.current += 10
-                    ScrollPositionLog.debug({ message: 'overScroll pos', overScroll: overScrollRef.current })
+                    ScrollPositionLog.debug({ message: 'overScroll pos', overScroll: overScrollRef.current, scrollPosition, deltaY: e.deltaY })
                     setOverScroll(overScrollRef.current)
                     resScroll()
                 }

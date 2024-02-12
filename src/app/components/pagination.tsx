@@ -66,7 +66,7 @@ export default function CustomPagination() {
             loop
             total={3}
             initialPage={1}
-            className="flex justify-center gap-2 w-full box-border"
+            className="flex justify-center gap-2 w-full box-border m-0"
             radius="full"
             renderItem={renderItem}
             variant="light"
