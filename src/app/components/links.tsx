@@ -16,6 +16,7 @@ export const InternalLinks = [
 ] as const
 export type InternalLinkType = typeof InternalLinks[number]
 export type InternalLinksType = typeof InternalLinks
+export const isInternalLink = (link: string): link is InternalLinkType => InternalLinks.includes(link as InternalLinkType)
 export const ExternalLinks = [
     'https://www.linkedin.com/in/christopher-billingham/',
     'https://www.github.com/ChrisIBill',
