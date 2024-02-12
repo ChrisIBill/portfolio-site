@@ -6,6 +6,7 @@ import Footer from './components/footer'
 import NextHeader from './components/header'
 import GoogleAnalytics from './google-analytics'
 import SwipeableLayer from './components/swipeable-layer'
+import CustomPagination from './components/pagination'
 
 const font = Lato({ weight: '400', subsets: ['latin'] })
 
@@ -41,7 +42,7 @@ export default function RootLayout({
     children: React.ReactNode
 }) {
     return (
-        <html lang="en" id='root' className='bg-transparent overflow-hidden' suppressHydrationWarning>
+        <html lang="en" id='root' className='bg-transparent overflow-visible' suppressHydrationWarning>
             <body>
                 <div id='background-layer-light' className='background-layer transition-colors before:bg-gradient-to-b dark:before:from-default-200 dark:before:to-default-300 before:from-default-800 before:to-default-700 before:opacity-0 dark:before:opacity-100'>
                     <div id='background-layer-dark' className='background-layer transition-colors before:bg-gradient-to-b before:from-default-200 before:to-default-300 dark:before:from-default-800 dark:before:to-default-700 dark:before:opacity-0 before:opacity-100'>
@@ -49,17 +50,17 @@ export default function RootLayout({
                             <GoogleAnalytics ga_id=
                                 {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS} />
                         ) : null}
-                        <Providers className='absolute z-10 min-h-screen flex flex-col justify-between opacity-100 visible'>
-                            <div id='scrollable' className='w-screen h-screen overflow-y-scroll overflow-x-scroll xs:overflow-x-hidden'>
-
-                                <NextHeader />
-                                <SwipeableLayer className='relative z-5 flex-grow flex'>
-                                    <main className={font.className + ' relative z-10 box-border flex justify-center'}>{children}</main>
-                                </SwipeableLayer>
-                                <nav></nav>
-                                <Footer />
+                        <Providers className='absolute z-10 min-h-screen flex flex-col justify-between opacity-100 visible overflow-visible'>
+                            <NextHeader />
+                            <div id='scrollable' className='w-screen h-screen overflow-y-scroll overflow-x-scroll xs:overflow-x-hidden flex flex-col fixed'>
+                                <div id='scrollable-content' className='absolute min-h-screen flex flex-col pt-16'>
+                                    <SwipeableLayer className='relative z-5 flex-grow flex overflow-x-hidden'>
+                                        <main className={font.className + ' relative z-10 box-border flex justify-center'}>{children}</main>
+                                    </SwipeableLayer>
+                                    <CustomPagination />
+                                    <Footer />
+                                </div>
                             </div>
-
                         </Providers>
                     </div>
                 </div>
