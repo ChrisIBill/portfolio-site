@@ -1,5 +1,3 @@
-'use client'
-
 import { GenericKeyValueObject } from "@/lib/interfaces"
 import { usePathname } from "next/navigation"
 import ThemeSwitcher from "./theme/theme-switcher"
@@ -9,6 +7,10 @@ import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, NavbarMenuToggle,
 import { SiteLinks, SiteLinkType } from "./links"
 import { useIsLessThanXS } from "@/lib/hooks/resize"
 import dynamic from "next/dynamic"
+import CustomNavbarMenu from "./header-menu"
+import logger from "@/lib/pino"
+
+export const HeaderLog = logger.child({ module: 'Navbar' })
 
 
 
@@ -19,12 +21,12 @@ const PathnamesToDisplayTitles: GenericKeyValueObject<string> = {
     '/contact': 'Contact'
 }
 
-const DynamicNavbarMenu = dynamic(() => import('./header-menu'), {
-    ssr: false,
-})
+//const DynamicNavbarMenu = dynamic(() => import('./header-menu'), {
+//    ssr: false,
+//})
 
 const NextHeader = () => {
-    const pathname = usePathname()
+    HeaderLog.debug({ message: 'render header' })
     return (
         <Navbar
             classNames={{
@@ -70,7 +72,7 @@ const NextHeader = () => {
             <NavbarBrand className="hidden text-default-900">
                 {/* TODO: Logo */}
             </NavbarBrand>
-            <DynamicNavbarMenu pathname={pathname} />
+            <CustomNavbarMenu lessThanXs={false} />
             <NavbarContent className="flex gap-4" justify="end">
                 <ThemeSwitcher />
             </NavbarContent>

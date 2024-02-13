@@ -1,13 +1,22 @@
+'use client'
 import '@/app/globals.scss'
 import { SiteLinks, SiteLinkType } from "./links"
-import { NavbarContent, Link, NavbarItem, NavbarMenu, NavbarMenuItem } from "@nextui-org/react"
-import React from "react"
-import { useIsLessThanXS } from "@/lib/hooks/resize"
+import { Link, NavbarContent, NavbarItem, NavbarMenu, NavbarMenuItem } from "@nextui-org/react"
 
-const NavBarMenu = (props: {
-    pathname: string
-}) => {
-    const lessThanXs = useIsLessThanXS()
+import React, { memo } from "react"
+import { useIsLessThanXS } from "@/lib/hooks/resize"
+import logger from '@/lib/pino'
+import { usePathname } from 'next/navigation'
+import { HeaderLog } from "./header"
+
+const HeaderMenuLog = HeaderLog.child({ path: 'NavbarMenu', component: 'Menu' })
+
+const CustomNavbarMenu = memo(function NavBarMenu(props: {
+    lessThanXs: boolean
+}) {
+    const pathname = usePathname()
+    HeaderMenuLog.debug({ message: 'render NavBarMenu', pathname, props })
+    const lessThanXs = props.lessThanXs
     const [isClient, setIsClient] = React.useState(false)
 
     React.useEffect(() => {
@@ -15,10 +24,10 @@ const NavBarMenu = (props: {
     }, [])
 
     if (!isClient)
-        return <ListMenuItems pathname={props.pathname} />
-    return lessThanXs ? <ListMenuItems pathname={props.pathname} />
-        : <ContentMenuItems pathname={props.pathname} />
-}
+        return <ListMenuItems pathname={pathname} />
+    return lessThanXs ? <ListMenuItems pathname={pathname} />
+        : <ContentMenuItems pathname={pathname} />
+})
 
 const ListMenuItems = (props: any) => {
     return (
@@ -78,4 +87,4 @@ const MenuItemLink = (props: {
     )
 }
 
-export default NavBarMenu
+export default CustomNavbarMenu
