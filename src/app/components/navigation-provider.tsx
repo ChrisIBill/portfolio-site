@@ -7,24 +7,33 @@ import logger from "@/lib/pino";
 
 const NavigationProviderLog = logger.child({ module: 'NavigationProvider' })
 
-const AnimationStrings = [
+export const ExitAnimationStrings = [
     'animate-slideOutLeft',
     'animate-slideOutRight',
+    'animate-fadeOut',
+] as const
+export const EnterAnimationStrings = [
     'animate-slideInLeft',
     'animate-slideInRight',
-    'animate-fadeOut',
     'animate-fadeIn',
+] as const
+const AnimationStrings = [
+    ...EnterAnimationStrings,
+    ...ExitAnimationStrings,
     '',
 ] as const
+export type ExitAnimationStringType = typeof ExitAnimationStrings[number]
+export type EnterAnimationStringType = typeof EnterAnimationStrings[number]
 export type AnimationStringType = typeof AnimationStrings[number]
 
 export function NavigationProvider({ children }: { children: React.ReactNode }) {
     const pathname = usePathname()
     const router = useRouter()
     const [animateNavigation, setAnimateNavigation] = useState(false)
-    const [animationString, setAnimationString] = useState < AnimationStringType > ('')
-    const [currentPage, setCurrentPage] = useState < InternalLinkType > (pathname as InternalLinkType)
-    const requestedPage = useRef < InternalLinkType > ('/')
+    const [animationString, setAnimationString] = useState<AnimationStringType>('')
+    const [currentPage, setCurrentPage] = useState<InternalLinkType>(pathname as InternalLinkType)
+    const requestedPage = useRef<InternalLinkType>('/')
+    const [swipePosition, setSwipePosition] = useState(0)
 
     const asyncDelayRouterSwitch = useCallback(async (url: InternalLinkType, cb: () => void, delay = 500): Promise<void | (() => void)> => {
         NavigationProviderLog.debug({ message: 'asyncDelayRouterSwitch', url, delay })
@@ -47,16 +56,20 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
                 //cb()
             })
     }, [router])
-    const pageRefs = useRef < { [key: string]: InternalLinkType } > ({
+    const pageRefs = useRef<{ [key: string]: InternalLinkType }>({
     })
-    const handleRouteChange = (direction?: NavigationDirection) => {
+
+    //Route Change Handlers
+    const handleRouteChange = useCallback(async (direction?: NavigationDirection) => {
         NavigationProviderLog.debug({
             message: 'handleRouteChange',
             direction,
             requestedPage: requestedPage.current,
             pageRefs: pageRefs.current,
         })
-        if (animateNavigation) return
+        if (animateNavigation) {
+            throw new Error('Navigation already animating', { cause: animateNavigation })
+        }
         setAnimateNavigation(true)
         if (direction === 'next') {
             requestedPage.current = pageRefs.current.next
@@ -66,12 +79,9 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
             setAnimationString('animate-slideOutRight')
             requestedPage.current = pageRefs.current.prev
         }
-        else {
-            NavigationProviderLog.error('Invalid route or direction', { direction })
-            setAnimationString('')
-        }
-    }
-    const handleRouteRequest = (route: string) => {
+    }, [animateNavigation])
+
+    const handleRouteRequest = useCallback((route: string) => {
         NavigationProviderLog.debug({
             message: 'handleRouteChange',
             route,
@@ -84,7 +94,7 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
         else if (route === pageRefs.current.prev) setAnimationString('animate-slideOutRight')
         else setAnimationString('animate-fadeOut')
         requestedPage.current = route
-    }
+    }, [])
 
     useEffect(() => {
         NavigationProviderLog.debug({
@@ -119,6 +129,10 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
             pathname,
         })
         if (!isInternalLink(pathname)) throw new Error('Invalid pathname', { cause: pathname })
+        NavigationProviderLog.debug({
+            message: 'setting current page',
+            pathname,
+        })
         setCurrentPage(pathname)
         if (pathname === pageRefs.current.next) setAnimationString('animate-slideInRight')
         else if (pathname === pageRefs.current.prev) setAnimationString('animate-slideInLeft')
@@ -139,6 +153,9 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
             currentPage: currentPage,
             setCurrentPage: setCurrentPage,
             handleRouteChange,
+            handleRouteRequest,
+            swipePosition,
+            setSwipePosition,
         }}>
             {children}
         </ NavigationContext.Provider>

@@ -7,6 +7,7 @@ import useScrollPosition from '@/lib/hooks/scroll-position'
 import { useSwipeable } from "react-swipeable"
 import { useContext } from "react"
 import { NavigationContext } from "@/lib/navigation-context"
+import { AnimationStringType, EnterAnimationStringType, EnterAnimationStrings, ExitAnimationStringType, ExitAnimationStrings } from "./navigation-provider"
 
 const SwipeableLayerLog = logger.child({ module: 'SwipeableLayer' })
 
@@ -14,30 +15,10 @@ const SwipeableLayerLog = logger.child({ module: 'SwipeableLayer' })
 const SWIPE_THRESHOLD = 50
 
 
-const Pages: Array<string> = [
-    "/",
-    "/about",
-    "/projects",
-]
-type AnimateString =
-    'animate-slideOutLeft'
-    | 'animate-slideOutRight'
-    | 'animate-slideInLeft'
-    | 'animate-slideInRight'
-    | ''
 const SwipeableLayer = (props: { children: React.ReactNode, className?: string }) => {
     const pathname = usePathname()
-    const { animateNavigation, setAnimateNavigation, animationString, handleRouteChange } = useContext(NavigationContext)
-    const { addToScroll, overScroll, resetOverScroll } = useScrollPosition()
-    const [elemPos, setElemPos] = useState({ x: 0, y: 0 })
-
-    const resetSwipeState = () => {
-        SwipeableLayerLog.debug({
-            message: 'resetSwipeState',
-        })
-        setElemPos({ x: 0, y: 0 })
-        resetOverScroll()
-    }
+    const { animateNavigation, setAnimateNavigation, animationString, handleRouteChange, swipePosition, setSwipePosition } = useContext(NavigationContext)
+    const { addToScroll, overScroll } = useScrollPosition()
 
     const swipeHandlers = useSwipeable({
         onSwipedLeft: (e) => {
@@ -54,14 +35,15 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
         },
         onSwiping: (e) => {
             SwipeableLayerLog.debug({ message: 'onSwiping', deltaX: e.deltaX, deltaY: e.deltaY })
-            if (Math.abs(e.deltaX) >= 15)
-                setElemPos({ x: e.deltaX, y: 0 })
+            if (Math.abs(e.deltaX) >= 15) {
+                setSwipePosition(e.deltaX)
+            }
             addToScroll(-e.deltaY)
         },
         onSwiped: (e) => {
             SwipeableLayerLog.debug('onSwiped', e)
             if (e.deltaX > -SWIPE_THRESHOLD && e.deltaX < SWIPE_THRESHOLD) {
-                setElemPos({ x: 0, y: 0 })
+                setSwipePosition(0)
             }
         },
         delta: 10,
@@ -73,7 +55,7 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
 
     useEffect(() => {
         if (animateNavigation) return
-        setElemPos({ x: overScroll, y: 0 })
+        setSwipePosition(overScroll)
         if (overScroll <= -50) {
             handleRouteChange('next')
         } else if (overScroll >= 50) {
@@ -82,14 +64,16 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
     }, [overScroll])
 
     useEffect(() => {
-        setElemPos({ x: 0, y: 0 })
+        setSwipePosition(0)
     }, [pathname])
 
     return (
         <div className={
             'relative z-5 w-full overflow-visible flex-grow pt-16 top-0 left-0 flex justify-center items-center transition-all duration-300 '
             + (animateNavigation ? animationString : '')}
-            onAnimationEnd={() => setAnimateNavigation(false)}
+            onAnimationEnd={() => {
+                EnterAnimationStrings.includes(animationString as EnterAnimationStringType) ? setAnimateNavigation(false) : null
+            }}
         >
             <div
                 id='draggable'
@@ -97,8 +81,7 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
                 {...swipeHandlers}
                 style={{
                     position: 'relative',
-                    left: elemPos.x,
-                    top: elemPos.y,
+                    left: swipePosition,
                 }}
             >
 
@@ -110,7 +93,7 @@ const SwipeableLayer = (props: { children: React.ReactNode, className?: string }
 
 export function useSwipeableLayer() {
     const [animate, setAnimate] = useState(false)
-    const [animateString, setAnimateString] = useState < AnimateString > ('')
+    const [animateString, setAnimateString] = useState < AnimationStringType > ('')
     return {
         animate,
         setAnimate,
