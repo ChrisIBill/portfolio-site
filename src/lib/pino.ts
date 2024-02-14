@@ -1,9 +1,5 @@
-import {
-  infofileAddr,
-  outfileAddr,
-  serverFileAddr,
-} from "@/app/pino.api/route.dev";
 import pino from "pino";
+import { infofileAddr, outfileAddr, serverFileAddr } from "./constants.dev";
 
 const config = {
   serverUrl: process.env.REACT_APP_API_PATH || "http://localhost:3000",

@@ -1,11 +1,8 @@
+"use server";
 //export const dynamic = "force-dynamic";
 import { NextApiResponse } from "next/types";
 import { appendFile } from "fs/promises";
 import logger from "@/lib/pino";
-
-export const outfileAddr = "pino.log.out.json" as const;
-export const infofileAddr = "pino.log.info.json" as const;
-export const serverFileAddr = "pino.log.server.json" as const;
 
 //export async function GET(req: NextApiRequest, res: NextApiResponse) {
 //  console.log("GET: ", req);
