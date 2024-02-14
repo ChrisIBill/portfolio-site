@@ -1,10 +1,9 @@
-import pino from "pino";
 import {
-  getFileWriteStream,
-  outfileAddr,
   infofileAddr,
+  outfileAddr,
   serverFileAddr,
-} from "./streams.dev";
+} from "@/app/pino.api/route.dev";
+import pino from "pino";
 
 const config = {
   serverUrl: process.env.REACT_APP_API_PATH || "http://localhost:3000",
