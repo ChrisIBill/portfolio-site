@@ -4,7 +4,7 @@ import {
   outfileAddr,
   infofileAddr,
   serverFileAddr,
-} from "./streams";
+} from "./streams.dev";
 
 export const enum LogLevelEnum {
   trace = "trace",
@@ -42,50 +42,6 @@ type Stream = {
 };
 const streams: Stream[] = [{ stream: process.stdout }];
 
-function getMultiStreams() {
-  if (config.server) {
-    console.log("multiStreams");
-    //const outfile = fsStreams('pino.log.out')
-
-    Promise.all([
-      getFileWriteStream({ path: outfileAddr })
-        .then((stream) => {
-          console.log("finished getFileWriteStream", outfileAddr);
-          if (stream) streams.push({ stream });
-        })
-        .catch((err) => {
-          console.error({
-            message: "Error getting file write stream",
-            error: err,
-          });
-        }),
-      getFileWriteStream({ path: infofileAddr })
-        .then((stream) => {
-          console.log("finished getFileWriteStream", infofileAddr);
-          if (stream) streams.push({ stream, level: "info" });
-        })
-        .catch((err) => {
-          console.error({
-            message: "Error getting file write stream",
-            error: err,
-          });
-        }),
-      getFileWriteStream({ path: serverFileAddr })
-        .then((stream) => {
-          console.log("finished getFileWriteStream", serverFileAddr);
-          if (stream) streams.push({ stream });
-        })
-        .catch((err) => {
-          console.error({
-            message: "Error getting file write stream",
-            error: err,
-          });
-        }),
-    ]).then(() => {
-      console.log("multiStreams promise finished");
-    });
-  }
-}
 const pinoConfig: any = {
   level: config.level,
   depthLimit: 5,
@@ -97,13 +53,22 @@ const pinoConfig: any = {
     level: "info",
     env: config.env,
   },
+  streams: [],
 };
 
-if (!config.server) {
+if (config.serverUrl) {
   pinoConfig.browser = {
     transmit: {
       level: config.level,
-      send: (level, logEvent) => {
+      send: (
+        level: any,
+        logEvent: {
+          messages?: any;
+          level?: any;
+          ts?: any;
+          bindings?: any;
+        },
+      ) => {
         const { ts, bindings } = logEvent;
         const msg = logEvent.messages[0];
         const headers = {
@@ -112,46 +77,48 @@ if (!config.server) {
             "Origin, X-Requested-With, Content-Type, Accept",
           type: "application/json",
         };
-        let blob = new Blob(
-          [JSON.stringify({ origin: "browser", ts, bindings, msg, level })],
-          headers,
-        );
-        if (logEvent.level.value >= 20)
+        if (config.env === "development" && logEvent.level.value >= 20) {
+          let blob = new Blob(
+            [
+              JSON.stringify({
+                level,
+                levelValue: logEvent.level?.value,
+                origin: "browser",
+                ts,
+                bindings,
+                msg,
+              }),
+            ],
+            headers,
+          );
           navigator.sendBeacon(config.serverUrl + "/pino.api", blob);
+        }
       },
     },
   };
 }
-if (config.server) {
-  pinoConfig.transport = pino.transport({
-    targets: [
-      {
-        target: "pino/file",
-        level: "trace",
-        options: { destination: "../../pino.log.out.json" },
-      },
-      {
-        target: "pino/file",
-        level: "info",
-        options: {
-          destination: "pin.log.info.json",
-        },
-      },
-      {
-        target: "pino/file",
-        level: "debug",
-        options: { destination: "pino.log.server.json" },
-      },
-    ],
-  });
-} else {
+
+if (config.server && config.env === "development") {
+  //if on server and in devel,
+  //init file write streams for logs on server side
+  const outfile = getFileWriteStream({ path: outfileAddr });
+  const infofile = getFileWriteStream({ path: infofileAddr });
+  const serverfile = getFileWriteStream({ path: serverFileAddr });
+  outfile && streams.push({ stream: outfile });
+  infofile && streams.push({ stream: infofile, level: "info" });
+  serverfile && streams.push({ stream: serverfile });
+  pinoConfig.multistream = pino.multistream(streams);
 }
-console.log("pinoTest: ", pinoConfig.transport);
-const logger = pino(pinoConfig.transport ?? pinoConfig);
+
+const logger =
+  config.env === "development"
+    ? pino(pinoConfig, pinoConfig.multistream || pinoConfig.streams)
+    : pino(pinoConfig);
+
 logger.info({
   message: "pino logger initialized",
-  config,
 });
+
 export const infolog = (msg: string) => logger.info(msg);
 export const debuglog = (msg: string) => logger.debug(msg);
 

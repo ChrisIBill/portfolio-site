@@ -13,24 +13,18 @@ const nextConfig = {
       },
     ];
   },
-  // webpack: (config, options) => {
-  //   config.module.rules.push(
-  //     {
-  //       "thread-stream-worker": pinoWebpackAbsolutePath(
-  //         "./thread-stream-worker.js",
-  //       ),
-  //     },
-  //     { "pino/file": pinoWebpackAbsolutePath("./pino-file.js") },
-  //     { "pino-worker": pinoWebpackAbsolutePath("./pino-worker.js") },
-  //     {
-  //       "pino-pipeline-worker": pinoWebpackAbsolutePath(
-  //         "./pino-pipeline-worker.js",
-  //       ),
-  //     },
-  //     { "pino-pretty": pinoWebpackAbsolutePath("./pino-pretty.js") },
-  //   );
-  //   return config;
-  // },
 };
 
-module.exports = nextConfig;
+module.exports = {
+  ...nextConfig,
+  pageExtensions: ["tsx", "ts", "js", "jsx"]
+    .map((extension) => {
+      const isDev = process.env.NODE_ENV === "development";
+      const prefixes = isDev ? ["dev"] : ["prod"];
+      return [
+        `${extension}`,
+        ...prefixes.map((prefix) => `${prefix}.${extension}`),
+      ];
+    })
+    .flat(),
+};
