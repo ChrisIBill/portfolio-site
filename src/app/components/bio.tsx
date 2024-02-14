@@ -1,3 +1,4 @@
+'use server'
 const BioComponent: React.FC = () => {
     return (
         <div className="relative flex flex-col w-full min-h-full items-center justify-center transition-all animate-fadeIn">

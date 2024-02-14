@@ -22,7 +22,7 @@ export default function useScrollPosition() {
         else scrollToRef.current += amount
 
         scrollToRef.current = Math.max(Math.min(scrollToRef.current, maxScrollPosition || 0), 0)
-        ScrollPositionLog.debug({ message: 'addToScroll', scrollTo, scrollToRef: scrollToRef.current, scrollRef: scrollRef.current })
+        ScrollPositionLog.debug({ message: 'addToScroll', scrollTo, scrollToRef: scrollToRef.current })
         setTimeout(() => scrollRef.current?.scrollTo({ top: scrollToRef.current, behavior: 'smooth' }))
         setScrollPosition(scrollToRef.current)
     }
@@ -40,7 +40,7 @@ export default function useScrollPosition() {
                 ScrollPositionLog.error({ message: 'scrollRef.current not found' })
                 return
             }
-            ScrollPositionLog.debug({ message: 'scrollRef.current found', scrollRef: scrollRef.current })
+            ScrollPositionLog.debug({ message: 'scrollRef.current found', scrollRef: scrollRef.current.title })
         }
         const handleScroll = (e: Event) => {
             ScrollPositionLog.debug({ message: 'scrolling', scrollPos: scrollRef.current?.scrollTop || 0 })

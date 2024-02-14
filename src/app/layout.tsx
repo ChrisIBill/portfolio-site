@@ -7,6 +7,7 @@ import NextHeader from './components/header'
 import GoogleAnalytics from './google-analytics'
 import SwipeableLayer from './components/swipeable-layer'
 import CustomPagination from './components/pagination'
+import logger from '@/lib/pino'
 
 const font = Lato({ weight: '400', subsets: ['latin'] })
 
@@ -36,11 +37,14 @@ export const metadata: Metadata = {
     description: 'Software Engineer and Web Developer with a B.S. in Computer Science. Built with Next.JS.',
 }
 
+const LayoutLog = logger.child({ module: 'Layout' })
+
 export default function RootLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
+    LayoutLog.debug({ message: 'render layout' })
     return (
         <html lang="en" id='root' className='bg-transparent overflow-visible' suppressHydrationWarning>
             <body>
@@ -53,14 +57,15 @@ export default function RootLayout({
                         <Providers className='absolute z-10 min-h-screen flex flex-col justify-between opacity-100 visible overflow-visible'>
                             <NextHeader />
                             <div id='scrollable' className='w-screen h-screen overflow-y-scroll overflow-x-scroll xs:overflow-x-hidden flex flex-col fixed'>
-                                <div id='scrollable-content' className='absolute min-h-screen flex flex-col pt-16'>
+                                <div id='scrollable-content' className='absolute min-h-screen flex flex-col'>
                                     <SwipeableLayer className='relative z-5 flex-grow flex overflow-x-hidden'>
                                         <main className={font.className + ' relative z-10 box-border flex justify-center'}>{children}</main>
                                     </SwipeableLayer>
-                                    <CustomPagination />
+                                    <div id='pagination-filler-item' className='h-16'></div>
                                     <Footer />
                                 </div>
                             </div>
+                            <CustomPagination />
                         </Providers>
                     </div>
                 </div>
