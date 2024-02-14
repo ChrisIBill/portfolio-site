@@ -13,6 +13,9 @@ export interface NavigationContextType {
     currentPage: string;
     setCurrentPage: (value: string) => void;
     handleRouteChange: (direction?: NavigationDirection) => void;
+    handleRouteRequest: (route: InternalLinkType) => void;
+    swipePosition: number;
+    setSwipePosition: (value: number) => void;
 }
 
 export const NavigationContext = createContext({
@@ -23,6 +26,9 @@ export const NavigationContext = createContext({
     currentPage: '/' as InternalLinkType,
     setCurrentPage: (value: InternalLinkType) => { },
     handleRouteChange: (direction?: NavigationDirection) => { },
+    handleRouteRequest: (route: InternalLinkType) => { },
+    swipePosition: 0,
+    setSwipePosition: (value: number) => { },
 });
 
 // export interface GenericLoopingIterator<K, T extends readonly K[]> {
