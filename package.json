@@ -1,41 +1,43 @@
 {
-    "name": "portfolio-site",
-    "version": "0.1.0",
-    "private": true,
-    "scripts": {
-        "dev": "next dev | pino-pretty -c -t",
-        "build": "next build",
-        "start": "next start",
-        "lint": "next lint"
-    },
-    "dependencies": {
-        "@emotion/react": "^11.11.3",
-        "@emotion/styled": "^11.11.0",
-        "@nextui-org/react": "^2.2.9",
-        "@theme-toggles/react": "^4.1.0",
-        "framer-motion": "^10.17.4",
-        "lodash": "^4.17.21",
-        "next": "14.0.4",
-        "next-themes": "^0.2.1",
-        "pino": "^8.18.0",
-        "react": "^18",
-        "react-dom": "^18",
-        "react-icons": "^4.12.0",
-        "react-swipeable": "^7.0.1",
-        "sass": "^1.69.7"
-    },
-    "devDependencies": {
-        "@types/lodash": "^4.14.202",
-        "@types/node": "^20",
-        "@types/pino": "^7.0.5",
-        "@types/react": "^18",
-        "@types/react-dom": "^18",
-        "autoprefixer": "^10.0.1",
-        "eslint": "^8",
-        "eslint-config-next": "14.0.4",
-        "import-cost": "^3.2.0",
-        "postcss": "^8",
-        "tailwindcss": "^3.3.0",
-        "typescript": "^5"
-    }
+  "name": "portfolio-site",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "json-logger INFO 'running dev' | tee -a pino.log.out.json pino.log.server.json pino.log.info.json pino.log.client.json && next dev | pino-pretty -c -t",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.3",
+    "@emotion/styled": "^11.11.0",
+    "@nextui-org/react": "^2.2.9",
+    "@theme-toggles/react": "^4.1.0",
+    "framer-motion": "^10.17.4",
+    "lodash": "^4.17.21",
+    "matter-js": "^0.19.0",
+    "next": "14.0.4",
+    "next-themes": "^0.2.1",
+    "pino": "^8.18.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-icons": "^4.12.0",
+    "react-swipeable": "^7.0.1",
+    "sass": "^1.69.7"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.202",
+    "@types/matter-js": "^0.19.6",
+    "@types/node": "^20",
+    "@types/pino": "^7.0.5",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.0.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.4",
+    "import-cost": "^3.2.0",
+    "postcss": "^8",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5"
+  }
 }
