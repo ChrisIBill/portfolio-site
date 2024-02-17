@@ -13,9 +13,9 @@ const PostLog = logger.child({ module: "Post" });
 async function writeToFile(props: any) {
   return new Promise((resolve, reject) => {
     try {
-      if (props.level > props.request.levelValue)
+      if (props.request.levelValue < props.level)
         return resolve({ message: "Level too low" });
-      appendFile(props.path, JSON.stringify(props.request, null, "\n"), {
+      appendFile(props.path, JSON.stringify(props.request, null) + "\n", {
         flag: "as+",
       })
         .then(() => {
