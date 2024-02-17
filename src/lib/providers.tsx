@@ -6,6 +6,7 @@ import { ThemeProvider } from "next-themes";
 import { useRouter } from "next/navigation";
 import { IconContext } from "react-icons";
 import { NavigationProvider } from "@/app/components/navigation-provider";
+import { infolog } from "./pino";
 
 export function Providers({
   children,
@@ -15,6 +16,8 @@ export function Providers({
   className: string;
 }) {
   const router = useRouter();
+
+  infolog("rendering Providers");
 
   return (
     <NextUIProvider className={className} navigate={router.push}>

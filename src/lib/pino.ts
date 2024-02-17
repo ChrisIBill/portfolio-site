@@ -1,5 +1,6 @@
 import pino from "pino";
 import { infofileAddr, outfileAddr, serverFileAddr } from "./constants.dev";
+import { getCircularReplacer } from "./lib";
 
 const config = {
   serverUrl: process.env.REACT_APP_API_PATH || "http://localhost:3000",
@@ -10,7 +11,7 @@ const config = {
 };
 
 const send = (level: any, logEvent: any) => {
-  const { ts, bindings } = logEvent;
+  const { ts, bindings, err, origin, pid } = logEvent;
   const msg = logEvent.messages[0];
   const headers = {
     "Access-Control-Allow-Origin": "*",
@@ -19,16 +20,24 @@ const send = (level: any, logEvent: any) => {
     type: "application/json",
   };
   if (config.env === "development" && logEvent.level.value >= 20) {
+    //const messages = logEvent.messages.map((msg: any) => {
+    //  return typeof msg === "string" ? msg : msg.map((m: any) => m);
+    //});
     let blob = new Blob(
       [
-        JSON.stringify({
-          level,
-          levelValue: logEvent.level?.value,
-          origin: "browser",
-          ts,
-          bindings,
-          msg,
-        }),
+        JSON.stringify(
+          {
+            level,
+            msg,
+            err,
+            ts,
+            origin,
+            bindings,
+            pid,
+            levelValue: logEvent.level?.value,
+          },
+          getCircularReplacer(),
+        ),
       ],
       headers,
     );
@@ -43,10 +52,12 @@ const pinoConfig: any = {
     edgeLimit: 5,
     browser: {
       asObject: true,
+      serialize: true,
     },
     base: {
-      level: "info",
-      env: config.env,
+      level: this,
+      origin: config.server ? "localhost" : "browser",
+      pid: process.pid,
     },
   },
   streams: [{ stream: process.stdout }],
