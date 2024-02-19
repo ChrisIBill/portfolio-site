@@ -16,3 +16,22 @@ export function getCircularReplacer() {
     return value;
   };
 }
+
+/**
+ * Function to convert a value from one range to another, preserving ratio.
+ *
+ * @param {number} newMin - the minimum value of the new range
+ * @param {number} newMax - the maximum value of the new range
+ * @param {number} oldValue - the value to be converted
+ * @param {number} [oldMin] - the minimum value of the old range, default is 0
+ * @param {number} [oldMax] - the maximum value of the old range, default is 1
+ */
+export function shiftValueToRange(
+  newMin: number,
+  newMax: number,
+  oldValue: number,
+  oldMin: number = 0,
+  oldMax: number = 1,
+) {
+  return ((oldValue - oldMin) * (newMax - newMin)) / (oldMax - oldMin) + newMin;
+}

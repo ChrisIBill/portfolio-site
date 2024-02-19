@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, memo } from "react";
+import Matter from "matter-js";
 import {
   Engine,
   Render,
@@ -8,15 +9,27 @@ import {
   Composite,
   Mouse,
   MouseConstraint,
+  Constraint,
   Runner,
+  Events,
+  Common,
 } from "matter-js";
+import MatterAttractors from "matter-attractors";
+import MatterWrap from "matter-wrap";
 import cloth from "@/lib/cloth";
 import useRandomInterval from "@/lib/hooks/use-random-interval";
 import logger from "@/lib/pino";
 import { useTheme } from "next-themes";
 import { useWindowSize } from "@/lib/hooks/resize";
+import { shiftValueToRange } from "@/lib/lib";
 
-const NUM_CLOTH_COLS = 20;
+Matter.use(MatterAttractors, MatterWrap);
+
+const darkColors = ["#A0D7E3", "#FFD470", "#EC838C"] as const;
+const lightColors = ["#074453", "#C48900", "#6A1017"] as const;
+
+const NUM_CLOTH_COLS = 20 as const;
+const NUM_BODIES = 50 as const;
 const collisionFilters = {
   walls: 0x0001,
   floor: 0x0002,
@@ -27,90 +40,42 @@ const collisionFilters = {
 
 const MatterLogger = logger.child({ module: "Matter Canvas" });
 
+export type BodyRef = Matter.Body | null;
+interface SolarBodies {
+  sun: BodyRef;
+  mercury: BodyRef;
+  venus: BodyRef;
+  earth: BodyRef;
+  moon: BodyRef;
+}
 export default memo(function MatterTest() {
+  const theme = useTheme().theme;
   const windowSize = useWindowSize();
   const scene = useRef();
   const isPressed = useRef(false);
   const engine = useRef(Engine.create());
-  const balls = useRef<Body[]>([]);
+  const balls = useRef<Matter.Body[]>([]);
   const contentRef = useRef<HTMLElement | null>(null);
-  const boundingBoxes = useRef<Body[]>([]);
-  const contentBody = useRef<Body | null>(null);
-  const render = useRef<Render>();
+  //const boundingBoxes = useRef<Matter.Body[]>([]);
+  const bodies = useRef<Matter.Body[]>([]);
+  const contentBody = useRef<Matter.Body | null>(null);
+  const render = useRef<Matter.Render>();
+  const colors = useRef<number[]>([]);
+  const sunBody = useRef<Matter.Body | null>(null);
+  const solarBodies = useRef<SolarBodies>({
+    sun: null,
+    mercury: null,
+    venus: null,
+    earth: null,
+    moon: null,
+  });
+
   engine.current.timing.timeScale = 0.5;
-  engine.current.world.gravity.y = 0.5;
-
-  // const ropeA = Composites.stack(0, 50, 8, 1, 10, 10, (x, y) => {
-  //   return Bodies.rectangle(x, y, 50, 20, {
-  //     collisionFilter: { group: Body.nextGroup(true) },
-  //   });
-  // });
-
-  //const canvasCloth = cloth(
-  //  100, //x
-  //  0, //y
-  //  NUM_CLOTH_COLS, //columns
-  //  16, //rows
-  //  20, //column gap
-  //  20, //row gap
-  //  false, //cross bracing
-  //  20, //particle radius
-  //  {},
-  //  {},
-  //);
-
-  //prevent the cloth from falling
-  //for (var i = 0; i < NUM_CLOTH_COLS; i++) {
-  //  canvasCloth.bodies[i].isStatic = true;
-  //}
+  engine.current.world.gravity.scale = 0;
 
   useEffect(() => {
     const cw = document.body.clientWidth;
     const ch = document.body.clientHeight;
-    // if (contentRef.current === null) {
-    //   contentRef.current = document.getElementById("collidable-wrapper");
-    //   if (contentRef.current === null) {
-    //     MatterLogger.error({
-    //       message: "Content ref is null",
-    //       contentRef: contentRef.current,
-    //     });
-    //     return;
-    //   }
-    // }
-    // contentBody.current = Bodies.rectangle(
-    //   contentRef.current.offsetLeft + contentRef.current.clientWidth / 2,
-    //   contentRef.current.getBoundingClientRect().top +
-    //     contentRef.current.clientHeight / 2,
-    //   contentRef.current.getBoundingClientRect().width,
-    //   contentRef.current.clientHeight,
-    //   {
-    //     isStatic: true,
-    //     collisionFilter: { category: collisionFilters.content },
-    //     render: {
-    //       lineWidth: 2,
-    //       strokeStyle: "red",
-    //       fillStyle: "transparent",
-    //     },
-    //   },
-    // );
-    boundingBoxes.current = [
-      Bodies.rectangle(cw / 2, -10, cw, 20, {
-        isStatic: true,
-        collisionFilter: { category: collisionFilters.walls },
-      }),
-      Bodies.rectangle(-10, ch / 2, 20, ch, {
-        isStatic: true,
-        collisionFilter: { category: collisionFilters.walls },
-      }),
-      Bodies.rectangle(cw / 2, ch + 10, cw, 20, {
-        isStatic: true,
-        collisionFilter: { category: collisionFilters.floor },
-      }),
-      Bodies.rectangle(cw + 10, ch / 2, 20, ch, {
-        isStatic: true,
-        collisionFilter: { category: collisionFilters.walls },
-      }),
-    ];
 
     render.current = Render.create({
       element: scene.current,
@@ -121,10 +86,108 @@ export default memo(function MatterTest() {
         wireframes: false,
         background: "transparent",
         showBounds: true,
+        showDebug: true,
       },
     });
 
-    // Composite.add(engine.current.world, [
+    const genSolarBodies = {
+      isStatic: false,
+      friction: 0,
+      frictionAir: 0,
+      collisionFilter: {
+        category: collisionFilters.balls,
+        mask:
+          collisionFilters.balls |
+          collisionFilters.mouse |
+          collisionFilters.content,
+      },
+      plugin: {
+        attractors: [MatterAttractors.Attractors.gravity],
+        wrap: {
+          min: { x: 0, y: 0 },
+          max: {
+            x: render.current.options.width,
+            y: render.current.options.height,
+          },
+        },
+      },
+    };
+
+    const centerX = cw / 2,
+      centerY = ch / 2;
+    solarBodies.current.sun = Bodies.circle(centerX, centerY, 50, {
+      ...genSolarBodies,
+      isStatic: true,
+      mass: 3330,
+      render: {
+        fillStyle: "yellow",
+      },
+    });
+
+    solarBodies.current.mercury = Bodies.circle(centerX, centerY + 90, 10, {
+      ...genSolarBodies,
+      isStatic: false,
+      mass: 1,
+      render: {
+        fillStyle: "gray",
+      },
+    });
+
+    Body.setVelocity(solarBodies.current.mercury, {
+      x: 3.4,
+      y: 0,
+    });
+
+    solarBodies.current.venus = Bodies.circle(centerX - 140, centerY, 15, {
+      ...genSolarBodies,
+      isStatic: false,
+      mass: 16,
+      render: {
+        fillStyle: "orange",
+      },
+    });
+    Body.setVelocity(solarBodies.current.venus, {
+      x: 0,
+      y: 2.7, //2.7
+    });
+
+    solarBodies.current.earth = Bodies.circle(centerX + 300, centerY, 20, {
+      ...genSolarBodies,
+      isStatic: true,
+      mass: 20,
+      render: {
+        fillStyle: "blue",
+      },
+    });
+
+    solarBodies.current.moon = Bodies.circle(centerX + 335, centerY, 3, {
+      ...genSolarBodies,
+      isStatic: false,
+      mass: 0.2,
+      render: {
+        fillStyle: "white",
+      },
+    });
+    Body.setVelocity(solarBodies.current.moon, {
+      x: 0,
+      y: 1.2,
+    });
+    const earthMoonConstraint = Constraint.create({
+      bodyA: solarBodies.current.earth,
+      bodyB: solarBodies.current.moon,
+      stiffness: 0,
+    });
+
+    Composite.add(engine.current.world, [
+      solarBodies.current.sun,
+      solarBodies.current.mercury,
+      solarBodies.current.venus,
+      solarBodies.current.earth,
+      solarBodies.current.moon,
+      earthMoonConstraint,
+    ]);
+
+    // boundingBoxes.current = [
     //   Bodies.rectangle(cw / 2, -10, cw, 20, {
     //     isStatic: true,
     //     collisionFilter: { category: collisionFilters.walls },
@@ -141,8 +204,54 @@ export default memo(function MatterTest() {
     //     isStatic: true,
     //     collisionFilter: { category: collisionFilters.walls },
     //   }),
-    //   contentBody.current,
-    // ]);
+    // ];
+    for (let i = 0; i < 0; i++) {
+      const radius = 10 + Math.random() * 30;
+      colors.current.push(Math.round(Math.random() * (darkColors.length - 1)));
+      const body = Bodies.circle(
+        Common.random(10, render.current.options.width),
+        Common.random(10, render.current.options.height),
+        radius,
+        {
+          mass: radius * 2,
+          restitution: 0.9,
+          friction: 0,
+          frictionAir: 0,
+          collisionFilter: {
+            category: collisionFilters.balls,
+            mask:
+              collisionFilters.balls |
+              collisionFilters.mouse |
+              collisionFilters.content,
+          },
+          plugin: {
+            attractors: [MatterAttractors.Attractors.gravity],
+            wrap: {
+              min: { x: 0, y: 0 },
+              max: {
+                x: render.current.options.width,
+                y: render.current.options.height,
+              },
+            },
+          },
+          render: {
+            fillStyle:
+              theme === "dark"
+                ? darkColors[colors.current[colors.current.length - 1]]
+                : lightColors[colors.current[colors.current.length - 1]],
+          },
+        },
+      );
+      const speed = 5;
+      Body.setVelocity(body, {
+        x: (Math.random() - 0.5) * speed,
+        y: (Math.random() - 0.5) * speed,
+      });
+      balls.current.push(body);
+      Composite.add(engine.current.world, body);
+    }
+
+    //Composite.add(engine.current.world, [...balls.current]);
 
     console.log("Window", window.innerWidth, window.innerHeight);
     const mouse = Mouse.create(render.current.canvas),
@@ -153,6 +262,9 @@ export default memo(function MatterTest() {
           render: {
             visible: false,
           },
+        },
+        collisionFilter: {
+          category: collisionFilters.mouse,
         },
       });
     Composite.add(engine.current.world, mouseConstraint);
@@ -169,8 +281,6 @@ export default memo(function MatterTest() {
       }
       Composite.clear(engine.current.world, false);
       Engine.clear(engine.current);
-      //render.canvas = null;
-      //render.context = null;
     };
   }, []);
 
@@ -178,6 +288,12 @@ export default memo(function MatterTest() {
   useEffect(() => {
     const cw = document.body.clientWidth;
     const ch = document.body.clientHeight;
+    MatterLogger.info({
+      message: "Resizing canvas",
+      windowSize: windowSize,
+      cw: cw,
+      ch: ch,
+    });
     if (contentRef.current === null) {
       contentRef.current = document.getElementById("collidable-wrapper");
       if (contentRef.current === null) {
@@ -199,99 +315,60 @@ export default memo(function MatterTest() {
       MatterLogger.info({
         message: "Removing content body during resize event",
         bodies: Composite.allBodies(engine.current.world),
-        boundingBoxes: boundingBoxes.current,
       });
-      Composite.remove(engine.current.world, [
-        boundingBoxes.current[0],
-        boundingBoxes.current[1],
-        boundingBoxes.current[2],
-        boundingBoxes.current[3],
-        contentBody.current,
-      ]);
     }
-    contentBody.current = Bodies.rectangle(
-      contentRef.current.offsetLeft + contentRef.current.clientWidth / 2,
+    const contentX =
+      contentRef.current.offsetLeft + contentRef.current.clientWidth / 2;
+    const contentY =
       contentRef.current.getBoundingClientRect().top +
-        contentRef.current.clientHeight / 2,
-      contentRef.current.getBoundingClientRect().width,
-      contentRef.current.clientHeight,
-      {
-        isStatic: true,
-        collisionFilter: { category: collisionFilters.content },
-        render: {
-          lineWidth: 2,
-          strokeStyle: "red",
-          fillStyle: "transparent",
-        },
-      },
-    );
+      contentRef.current.clientHeight / 2;
+
+    // contentBody.current = Bodies.rectangle(
+    //   contentX,
+    //   contentY,
+    //   contentRef.current.getBoundingClientRect().width,
+    //   contentRef.current.clientHeight,
+    //   {
+    //     isStatic: true,
+    //     mass: 100,
+    //     collisionFilter: { category: collisionFilters.content },
+    //     plugin: {
+    //       attractors: [MatterAttractors.Attractors.gravity],
+    //     },
+    //     render: {
+    //       lineWidth: 2,
+    //       strokeStyle: "red",
+    //       fillStyle: "transparent",
+    //     },
+    //   },
+    // );
     render.current.bounds.max.x = cw;
     render.current.bounds.max.y = ch;
     render.current.canvas.width = cw;
     render.current.canvas.height = ch;
     render.current.options.width = cw;
     render.current.options.height = ch;
+    render.current.mouse = Mouse.create(render.current.canvas);
 
     Render.world(render.current);
-    Composite.add(engine.current.world, [
-      boundingBoxes.current[0],
-      boundingBoxes.current[1],
-      boundingBoxes.current[2],
-      boundingBoxes.current[3],
-      contentBody.current,
-    ]);
-
-    return () => {
-      //if (render.current && contentBody.current) {
-      //  Composite.add(engine.current.world, [
-      //    ...boundingBoxes.current,
-      //    contentBody.current,
-      //  ]);
-      //}
-      //   MatterLogger.info({
-      //     message: "Cleaning up during resize event",
-      //   });
-      //   if (render.current) {
-      //     render.current && Render.stop(render.current);
-      //     render.current.canvas.remove();
-      //     render.current.textures = {};
-      //   }
-      //   Composite.clear(engine.current.world, false);
-      //   Engine.clear(engine.current);
-      //   //render.canvas = null;
-      //   //render.context = null;
-    };
+    //Composite.add(engine.current.world, [contentBody.current]);
   }, [windowSize]);
 
-  useBallsManager({ engine });
-  // useRandomInterval(
-  //   () => {
-  //     balls.current.push(
-  //       Bodies.circle(
-  //         Math.random() * window.innerWidth,
-  //         -10,
-  //         10 + Math.random() * 30,
-  //         {
-  //           mass: 10,
-  //           restitution: 0.9,
-  //           friction: 0.005,
-  //           render: {
-  //             fillStyle: lightColors[0],
-  //           },
-  //         },
-  //       ),
-  //     );
-  //     Composite.add(engine.current.world, [
-  //       balls.current[balls.current.length - 1],
-  //     ]);
-  //     setTimeout(() => {
-  //       Composite.remove(engine.current.world, [balls.current[0]]);
-  //       balls.current.shift();
-  //     }, 10000);
-  //   },
-  //   1000,
-  //   2000,
-  // );
+  // Handle theme changes
+  useEffect(() => {
+    MatterLogger.info({
+      message: "Updating ball colors",
+      colors: colors.current,
+      theme: theme,
+    });
+    balls.current.forEach((ball, index) => {
+      ball.render.fillStyle =
+        theme === "dark"
+          ? darkColors[colors.current[index]]
+          : lightColors[colors.current[index]];
+    });
+  }, [theme]);
+
   const group = Body.nextGroup(true);
 
   const handleDown = () => {
@@ -302,24 +379,6 @@ export default memo(function MatterTest() {
   };
 
   const handleClick = (e) => {};
-  //const handleAddCircle = (e) => {
-  //  if (isPressed.current) {
-  //    const ball = Bodies.circle(
-  //      e.clientX,
-  //      e.clientY,
-  //      10 + Math.random() * 30,
-  //      {
-  //        mass: 10,
-  //        restitution: 0.9,
-  //        friction: 0.005,
-  //        render: {
-  //          fillStyle: "#0000ff",
-  //        },
-  //      },
-  //    );
-  //    Composite.add(engine.current.world, [ball]);
-  //  }
-  //};
 
   return (
     <div
@@ -336,118 +395,3 @@ export default memo(function MatterTest() {
     </div>
   );
 });
-
-const darkColors = ["#A0D7E3", "#FFD470"] as const;
-const lightColors = ["#074453", "#C48900"] as const;
-
-const MAX_BALLS = 20 as const;
-
-interface CustomBall extends Body {
-  colorNum: number;
-}
-
-const BallManagerLog = logger.child({ module: "Ball Manager" });
-
-function useBallsManager(props: { engine: React.MutableRefObject<Engine> }) {
-  const theme = useTheme().theme;
-  const balls = useRef<Body[]>([]);
-  const colors = useRef<number[]>([]);
-  balls.current.forEach((ball) => {});
-  useRandomInterval(
-    () => {
-      colors.current.push(Math.round(Math.random() * (darkColors.length - 1)));
-      BallManagerLog.info({
-        message: "Adding new ball",
-        color: colors.current[colors.current.length - 1],
-      });
-      const collisionController = Math.round(Math.random() * 32);
-      const mask1 = collisionController % 2 > 0;
-      const mask2 = collisionController % 4 > 2;
-      const mask3 = collisionController % 8 > 4;
-      const mask4 = collisionController % 16 > 8;
-      const mask5 = collisionController % 32 > 16;
-      BallManagerLog.debug({
-        message: "Collision controller",
-        controller: [mask1, mask2, mask3, mask4, mask5],
-      });
-      balls.current.push(
-        Bodies.circle(
-          Math.random() * window.innerWidth,
-          -10,
-          10 + Math.random() * 30,
-          {
-            mass: 10,
-            restitution: 0.9,
-            friction: 0.005,
-            collisionFilter: {
-              category: collisionFilters.balls,
-              mask:
-                (mask1 ? collisionFilters.walls : 0) |
-                (mask2 ? collisionFilters.floor : 0) |
-                (mask3 ? collisionFilters.balls : 0) |
-                (mask4 ? collisionFilters.mouse : 0) |
-                (mask5 ? collisionFilters.content : 0),
-            },
-            render: {
-              fillStyle:
-                theme === "dark"
-                  ? darkColors[colors.current[colors.current.length - 1]]
-                  : lightColors[colors.current[colors.current.length - 1]],
-            },
-          },
-        ),
-      );
-      Composite.add(props.engine.current.world, [
-        balls.current[balls.current.length - 1],
-      ]);
-      if (balls.current.length > MAX_BALLS) {
-        Composite.remove(props.engine.current.world, [balls.current[0]]);
-        balls.current.shift();
-      }
-    },
-    1000,
-    2000,
-  );
-
-  useEffect(() => {
-    BallManagerLog.info({
-      message: "Updating ball colors",
-      colors: colors.current,
-      theme: theme,
-    });
-    balls.current.forEach((ball, index) => {
-      ball.render.fillStyle =
-        theme === "dark"
-          ? darkColors[colors.current[index]]
-          : lightColors[colors.current[index]];
-    });
-  }, [theme]);
-}
-
-const useBallManager = (props: { engine: React.MutableRefObject<Engine> }) => {
-  const theme = useTheme().theme;
-  const color = useRef(Math.round(Math.random() * darkColors.length - 1));
-  const ball = useRef<Body>();
-
-  useEffect(() => {
-    ball.current = Bodies.circle(
-      Math.random() * window.innerWidth,
-      -10,
-      10 + Math.random() * 30,
-      {
-        mass: 10,
-        restitution: 0.9,
-        friction: 0.005,
-        render: {
-          fillStyle: lightColors[color.current],
-        },
-      },
-    );
-  }, []);
-
-  useEffect(() => {
-    ball.current.render.fillStyle =
-      theme === "dark" ? darkColors[color.current] : lightColors[color.current];
-  }, [theme]);
-  return ball;
-};
