@@ -1,6 +1,6 @@
 export function getCircularReplacer() {
   const ancestors: any[] = [];
-  return function (key: any, value: any) {
+  return function (this: any, key: any, value: any) {
     if (typeof value !== "object" || value === null) {
       return value;
     }
@@ -15,6 +15,10 @@ export function getCircularReplacer() {
     ancestors.push(value);
     return value;
   };
+}
+
+export function getRandomArbitrary(min: number, max: number) {
+  return Math.random() * (max - min) + min;
 }
 
 /**
@@ -34,4 +38,29 @@ export function shiftValueToRange(
   oldMax: number = 1,
 ) {
   return ((oldValue - oldMin) * (newMax - newMin)) / (oldMax - oldMin) + newMin;
+}
+
+export function getPointOnCircle(radius: number, angle: number) {
+  return {
+    x: radius * Math.cos((Math.PI * 2 * angle) / 360),
+    y: radius * Math.sin((Math.PI * 2 * angle) / 360),
+  };
+}
+
+export function getOrbitalVelocity(mass: number, radius: number) {
+  //return Math.sqrt((6.674 * Math.pow(10, -2) * mass) / radius);
+  return Math.sqrt((mass * 0.2777) / radius); //* 0.527;
+}
+
+export function objectToFlatArray<T>(obj: any): T[] {
+  const flatArray: any[] = [];
+  for (const key in obj) {
+    if (obj[key] instanceof Array) {
+      obj[key].forEach((element: any) => flatArray.push(element));
+    }
+    if (obj.hasOwnProperty(key)) {
+      flatArray.push(obj[key]);
+    }
+  }
+  return flatArray;
 }
