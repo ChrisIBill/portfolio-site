@@ -16,6 +16,9 @@ export function getCircularReplacer() {
     return value;
   };
 }
+export function ClampToRange(min: number, max: number, value: number) {
+  return Math.max(min, Math.min(max, value));
+}
 
 export function getRandomArbitrary(min: number, max: number) {
   return Math.random() * (max - min) + min;

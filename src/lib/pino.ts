@@ -19,7 +19,7 @@ const send = (level: any, logEvent: any) => {
       "Origin, X-Requested-With, Content-Type, Accept",
     type: "application/json",
   };
-  if (config.env === "development" && logEvent.level.value >= 20) {
+  if (config.env === "development" && logEvent.level.value >= 30) {
     //const messages = logEvent.messages.map((msg: any) => {
     //  return typeof msg === "string" ? msg : msg.map((m: any) => m);
     //});
