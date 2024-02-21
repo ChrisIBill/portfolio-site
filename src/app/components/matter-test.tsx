@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, memo } from "react";
+import { useEffect, useRef, memo, useState } from "react";
 import Matter from "matter-js";
 import {
   Engine,
@@ -20,6 +20,7 @@ import logger from "@/lib/pino";
 import { useTheme } from "next-themes";
 import { useWindowSize } from "@/lib/hooks/resize";
 import {
+  ClampToRange,
   getOrbitalVelocity,
   getPointOnCircle,
   getRandomArbitrary,
@@ -30,12 +31,29 @@ import {
   SolarBodies,
   solarSystemObjects,
 } from "@/lib/matter/solar-system-objects";
+import {
+  Coordinates,
+  directionToCoordsMap,
+  directionType,
+} from "@/lib/interfaces";
+import pino from "pino";
 
 Matter.use(MatterAttractors);
 
-const MatterLogger = logger.child({ module: "Matter Canvas" });
+export const MatterLogger = logger.child({ module: "Matter Canvas" });
+const MovementLog = MatterLogger.child(
+  { component: "Movement Handler" },
+  {
+    level: "info",
+  },
+);
+const ROCKET_FORCE = 0.000000000001;
 
 export default function MatterTest() {
+  const [rocketVector, setRocketVector] = useState<Coordinates>({
+    x: 0,
+    y: 0,
+  });
   const theme = useTheme().theme;
   const windowSize = useWindowSize();
   const scene = useRef<HTMLDivElement>(null);
@@ -47,11 +65,18 @@ export default function MatterTest() {
   const contentBody = useRef<Matter.Body | null>(null);
   const render = useRef<Matter.Render>();
   const colors = useRef<number[]>([]);
+  const eventCallbacks = useRef<(() => void)[]>([]);
+  const rocketMovement = useRef<Coordinates>({
+    x: 0,
+    y: 0,
+  });
+  const forceAppliedFn = useRef<() => void>();
   const solarBodies = useRef<SolarBodies>({
     sun: null,
     mercury: null,
     venus: null,
     earth: null,
+    rocket: null,
     moon: null,
     asteroids: [],
   });
@@ -84,147 +109,6 @@ export default function MatterTest() {
     });
     console.log("Render context", render.current.context);
 
-    // const genSolarBodies = {
-    //   isStatic: false,
-    //   friction: 0,
-    //   frictionAir: 0,
-    //   collisionFilter: {
-    //     category: collisionFilters.balls,
-    //     mask:
-    //       collisionFilters.balls |
-    //       collisionFilters.mouse |
-    //       collisionFilters.content,
-    //   },
-    //   plugin: {
-    //     attractors: [MatterAttractors.Attractors.gravity],
-    //   },
-    // };
-    //
-    // const solarMass = 333;
-    // const centerX = cw / 2,
-    //   centerY = ch / 2;
-    // solarObjs.sun = Bodies.circle(centerX, centerY, 50, {
-    //   ...genSolarBodies,
-    //   isStatic: true,
-    //   mass: solarMass,
-    //   render: {
-    //     fillStyle: "yellow",
-    //   },
-    // });
-    //
-    // solarObjs.mercury = Bodies.circle(centerX, centerY + 150, 4, {
-    //   ...genSolarBodies,
-    //   isStatic: false,
-    //   mass: 0.05,
-    //   render: {
-    //     fillStyle: "gray",
-    //   },
-    // });
-    //
-    // Body.setVelocity(solarObjs.mercury, {
-    //   x: -0.7,
-    //   y: 0,
-    // });
-    //
-    // solarObjs.venus = Bodies.circle(centerX - 200, centerY, 9.5, {
-    //   ...genSolarBodies,
-    //   isStatic: false,
-    //   mass: 0.85,
-    //   render: {
-    //     fillStyle: "orange",
-    //   },
-    // });
-    // Body.setVelocity(solarObjs.venus, {
-    //   x: 0,
-    //   y: -0.7, //2.7
-    // });
-    //
-    // solarObjs.earth = Bodies.circle(centerX + 700, centerY, 10, {
-    //   ...genSolarBodies,
-    //   isStatic: false,
-    //   mass: 6,
-    //   render: {
-    //     fillStyle: "blue",
-    //   },
-    // });
-    // Body.setVelocity(solarObjs.earth, {
-    //   x: 0,
-    //   y: 0.5,
-    // });
-    // solarObjs.earthSOI = Bodies.circle(centerX + 400, centerY, 50, {
-    //   ...genSolarBodies,
-    //   mass: 0,
-    //   render: {
-    //     fillStyle: "transparent",
-    //     strokeStyle: "red",
-    //   },
-    // });
-    //
-    // solarObjs.moon = Bodies.circle(centerX + 725, centerY, 3, {
-    //   ...genSolarBodies,
-    //   isStatic: false,
-    //   mass: 0.02,
-    //   render: {
-    //     fillStyle: "white",
-    //   },
-    // });
-    // Body.setVelocity(solarObjs.moon, {
-    //   x: 0,
-    //   y: 0.75,
-    // });
-    //
-    // const generateAsteroid = (index: number, angle?: number) => {
-    //   const orbitalRadius = 500 + Math.random() * 150;
-    //   //const orbitalRadius = 500;
-    //   //const radius = 1 + Math.random() * 3;
-    //   const radius = 5;
-    //   angle = angle ?? Math.random() * 360;
-    //   //const angle = 270;
-    //   const mass = 0.05;
-    //   const position = getPointOnCircle(orbitalRadius, angle);
-    //   const positionX = centerX + position.x;
-    //   const positionY = centerY + position.y;
-    //   const body = Bodies.circle(positionX, positionY, radius, {
-    //     ...genSolarBodies,
-    //     isStatic: false,
-    //     mass: mass,
-    //     label: "asteroid " + index,
-    //     render: {
-    //       fillStyle: "gray",
-    //     },
-    //   });
-    //   const velocity =
-    //     getOrbitalVelocity(solarMass, orbitalRadius) *
-    //     getRandomArbitrary(1, 1.2);
-    //   const xVelocity = (velocity * position.y) / orbitalRadius;
-    //   const yVelocity = (velocity * position.x) / orbitalRadius;
-    //   console.log("Asteroid Stats: ", {
-    //     angle,
-    //     positionX,
-    //     positionY,
-    //     velocity,
-    //     xVelocity,
-    //     yVelocity,
-    //   });
-    //   Body.setVelocity(body, {
-    //     x: -xVelocity,
-    //     y: yVelocity,
-    //   });
-    //   console.log("Asteroid Object", body);
-    //   solarObjs.asteroids.push(body);
-    //   Composite.add(engine.current.world, body);
-    // };
-    //
-    // //generateAsteroid();
-    // for (let i = 0; i < 150; i++) {
-    //   generateAsteroid(i);
-    // }
-    //
-    // const earthMoonConstraint = Constraint.create({
-    //   bodyA: solarObjs.earth,
-    //   bodyB: solarObjs.moon,
-    //   stiffness: 0,
-    // });
     const solarObjs = solarSystemObjects(cw, ch);
     solarBodies.current = solarSystemObjects(cw, ch);
 
@@ -233,9 +117,9 @@ export default function MatterTest() {
       solarObjs.mercury,
       solarObjs.venus,
       solarObjs.earth,
+      solarBodies.current.rocket!,
       solarObjs.moon,
       ...solarObjs.asteroids,
-      //earthMoonConstraint,
     ]);
 
     console.log("Window", window.innerWidth, window.innerHeight);
@@ -254,23 +138,22 @@ export default function MatterTest() {
       });
     Composite.add(engine.current.world, mouseConstraint);
 
-    const test = [
+    const solarObjsArr = [
       solarObjs.sun,
       solarObjs.mercury,
       solarObjs.venus,
       solarObjs.earth,
+      solarObjs.rocket,
       solarObjs.moon,
       ...solarObjs.asteroids,
     ];
-    //const test = objectToFlatArray<Matter.Body>(solarObjs);
-    console.log("Flattened solar objects", test);
-    Matter.Events.on(mouseConstraint, "mousemove", function (event) {
-      //For Matter.Query.point pass "array of bodies" and "mouse position"
-      var foundPhysics = Matter.Query.point(test, event.mouse.position);
-
-      //Your custom code here
+    //const solarObjsArr = objectToFlatArray<Matter.Body>(solarObjs);
+    const hoverLogging = (event: any) => {
+      var foundPhysics = Matter.Query.point(solarObjsArr, event.mouse.position);
       console.log("on hover event", foundPhysics[0]); //returns a shape corrisponding to the mouse position
-    });
+    };
+    console.log("Flattened solar objects", solarObjsArr);
+    //Matter.Events.on(mouseConstraint, "mousemove", hoverLogging); //returns a shape corrisponding to the mouse position
 
     render.current.mouse = Mouse.create(render.current.canvas);
     Runner.run(engine.current);
@@ -279,6 +162,107 @@ export default function MatterTest() {
       "All rendered bodies",
       Composite.allBodies(engine.current.world),
     );
+
+    const moveKeySwitch = (e: any, fn: (direction: directionType) => void) => {
+      e.key === "ArrowUp" && fn("up");
+      e.key === "ArrowDown" && fn("down");
+      e.key === "ArrowLeft" && fn("left");
+      e.key === "ArrowRight" && fn("right");
+    };
+
+    const controlMovement = () => {
+      let prev: undefined | (() => void);
+      let vector: Coordinates = {
+        x: 0,
+        y: 0,
+      };
+      function forceApplied() {
+        if (!solarBodies.current.rocket) {
+          MovementLog.error({
+            message: "Rocket is null",
+            rocket: solarBodies.current.rocket,
+          });
+          return;
+        }
+        Body.applyForce(
+          solarBodies.current.rocket,
+          solarBodies.current.rocket.position,
+          Matter.Vector.create(
+            vector.x * ROCKET_FORCE,
+            vector.y * ROCKET_FORCE,
+          ),
+        );
+      }
+
+      function clear() {
+        MovementLog.debug({ message: "Force Cleared" });
+        prev = undefined;
+        vector.x = 0;
+        vector.y = 0;
+        Events.off(engine.current, "beforeUpdate", forceApplied);
+      }
+      function callback(vec: Coordinates) {
+        MovementLog.debug({
+          message: "Control Movement Callback",
+          vec,
+          prev,
+          vector,
+        });
+
+        if (prev && (vector.x !== vec.x || vector.y !== vec.y)) {
+          MovementLog.debug({
+            message: "Clearing previous event",
+            rocket: solarBodies.current.rocket,
+          });
+          Events.off(engine.current, "beforeRender", prev);
+        } else if (vector.x === vec.x && vector.y === vec.y) {
+          MovementLog.debug({ message: "Vector unchanged, returning", vector });
+          return;
+        }
+        vector = {
+          x: ClampToRange(-1, 1, vector.x + vec.x),
+          y: ClampToRange(-1, 1, vector.y + vec.y),
+        };
+        if (!vector.x && !vector.y) {
+          MovementLog.debug({
+            message: "Vector is 0, halting acceleration",
+            vector,
+          });
+          Events.off(engine.current, "beforeUpdate", forceApplied);
+          prev = undefined;
+        } else {
+          prev = forceApplied;
+          MovementLog.debug({ message: "Vector changed", vector });
+          Events.on(engine.current, "beforeUpdate", forceApplied);
+        }
+      }
+      return {
+        callback,
+        clear,
+      };
+    };
+    const movementHandler = controlMovement();
+    const handleArrowKeysDown = (e: any) => {
+      function move(direction: directionType) {
+        console.log("Moving", direction);
+        const vector = directionToCoordsMap[direction];
+        movementHandler.callback(vector);
+      }
+      moveKeySwitch(e, move);
+    };
+    const handleArrowKeysUp = (e: any) => {
+      function endMove(direction: directionType) {
+        const vector = directionToCoordsMap[direction];
+        movementHandler.callback({
+          x: vector.x * -1,
+          y: vector.y * -1,
+        });
+      }
+      moveKeySwitch(e, endMove);
+    };
+
+    window.addEventListener("keydown", handleArrowKeysDown);
+    window.addEventListener("keyup", handleArrowKeysUp);
 
     return () => {
       console.log("Cleaning up Matter");
@@ -291,6 +275,7 @@ export default function MatterTest() {
       }
       render.current.canvas.remove();
       render.current.textures = {};
+      movementHandler.clear();
       //render.current.element = null;
       console.log(
         "All rendered bodies on cleanup",
@@ -301,6 +286,8 @@ export default function MatterTest() {
       Engine.clear(engine.current);
 
       solarObjs.asteroids = [];
+      window.removeEventListener("keydown", handleArrowKeysDown);
+      window.removeEventListener("keyup", handleArrowKeysUp);
     };
   }, []);
 

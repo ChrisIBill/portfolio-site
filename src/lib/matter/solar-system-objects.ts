@@ -6,6 +6,9 @@ import {
   getPointOnCircle,
   getRandomArbitrary,
 } from "../lib";
+import logger from "../pino";
+
+const SolarBodiesLog = logger.child({ module: "Solar Bodies" });
 
 export type BodyRef = Matter.Body | null;
 export const SolarBodiesKeys = [
@@ -13,6 +16,7 @@ export const SolarBodiesKeys = [
   "mercury",
   "venus",
   "earth",
+  "rocket",
   "moon",
   "earthSOI",
   "asteroids",
@@ -25,6 +29,7 @@ export type SolarBodies = {
   mercury: BodyRef;
   venus: BodyRef;
   earth: BodyRef;
+  rocket: BodyRef;
   //earthSOI: BodyRef;
   moon: BodyRef;
   asteroids: Matter.Body[];
@@ -108,8 +113,23 @@ const EARTH_PROPS: SolarObjectProps = {
     y: 0.5,
   },
 } as const;
+const ROCKET_PROPS: SolarObjectProps = {
+  offsetX: EARTH_PROPS.offsetX,
+  offsetY: EARTH_PROPS.offsetY + 10,
+  radius: 1,
+  options: {
+    mass: 0.000001,
+    render: {
+      fillStyle: "white",
+    },
+  },
+  velocity: {
+    x: 0,
+    y: 0.5,
+  },
+} as const;
 const MOON_PROPS: SolarObjectProps = {
-  offsetX: EARTH_PROPS.offsetX + 40,
+  offsetX: EARTH_PROPS.offsetX + 30,
   offsetY: 0,
   radius: 3,
   options: {
@@ -120,7 +140,7 @@ const MOON_PROPS: SolarObjectProps = {
   },
   velocity: {
     x: 0,
-    y: 0.705,
+    y: 0.73,
   },
 } as const;
 
@@ -156,7 +176,6 @@ export const solarSystemObjects = (cw: number, ch: number) => {
     },
   };
 
-  const solarMass = 333;
   const centerX = cw / 2,
     centerY = ch / 2;
   const getSolarObjectProps = setSolarObjectProps_CB(centerX, centerY);
@@ -165,7 +184,7 @@ export const solarSystemObjects = (cw: number, ch: number) => {
   const sun = Bodies.circle(sunProps.x, sunProps.y, sunProps.radius, {
     ...genSolarBodies,
     ...sunProps.options,
-    isStatic: true,
+    isStatic: false,
   });
 
   const mercuryProps = getSolarObjectProps(MERCURY_PROPS);
@@ -201,6 +220,17 @@ export const solarSystemObjects = (cw: number, ch: number) => {
     isStatic: false,
   });
   Body.setVelocity(earth, earthProps.velocity);
+  const rocketProps = getSolarObjectProps(ROCKET_PROPS);
+  const rocket = Bodies.circle(
+    rocketProps.x,
+    rocketProps.y,
+    rocketProps.radius,
+    {
+      ...genSolarBodies,
+      ...rocketProps.options,
+      isStatic: false,
+    },
+  );
   const earthSOI = Bodies.circle(centerX + 400, centerY, 50, {
     ...genSolarBodies,
     mass: 0,
@@ -221,10 +251,10 @@ export const solarSystemObjects = (cw: number, ch: number) => {
 
   const asteroids: Body[] = [];
   const generateAsteroid = (index: number, angle?: number) => {
-    const orbitalRadius = 800 + Math.random() * 150;
+    const orbitalRadius = 700 + Math.random() * 200;
     const radius = 1 + Math.random() * 3;
     angle = angle ?? Math.random() * 360;
-    const mass = 0.05;
+    const mass = 0.001 * radius ** 2;
     const position = getPointOnCircle(orbitalRadius, angle);
     const positionX = centerX + position.x;
     const positionY = centerY + position.y;
@@ -242,7 +272,8 @@ export const solarSystemObjects = (cw: number, ch: number) => {
       getRandomArbitrary(1, 1.2);
     const xVelocity = (velocity * position.y) / orbitalRadius;
     const yVelocity = (velocity * position.x) / orbitalRadius;
-    console.log("Asteroid Stats: ", {
+    SolarBodiesLog.debug({
+      message: "Asteroid Stats: ",
       angle,
       positionX,
       positionY,
@@ -254,7 +285,7 @@ export const solarSystemObjects = (cw: number, ch: number) => {
       x: -xVelocity,
       y: yVelocity,
     });
-    console.log("Asteroid Object", body);
+    SolarBodiesLog.debug({ message: "Asteroid Object", body });
     asteroids.push(body);
   };
 
@@ -262,7 +293,6 @@ export const solarSystemObjects = (cw: number, ch: number) => {
   for (let i = 0; i < 150; i++) {
     generateAsteroid(i);
   }
-  console.log("Asteroids: ", asteroids);
 
   //const earthMoonConstraint = Constraint.create({
   //  bodyA: earth,
@@ -275,6 +305,7 @@ export const solarSystemObjects = (cw: number, ch: number) => {
     mercury,
     venus,
     earth,
+    rocket,
     moon,
     asteroids,
   };
