@@ -23,10 +23,14 @@ import {
   ClampToRange,
   getOrbitalVelocity,
   getPointOnCircle,
+  getRadiusFromPoints,
   getRandomArbitrary,
   objectToFlatArray,
 } from "@/lib/lib";
-import { collisionFilters } from "@/lib/matter/constants";
+import {
+  GRAVITATIONAL_CONSTANT,
+  collisionFilters,
+} from "@/lib/matter/constants";
 import {
   SolarBodies,
   solarSystemObjects,
@@ -39,6 +43,7 @@ import {
 import pino from "pino";
 
 Matter.use(MatterAttractors);
+MatterAttractors.Attractors.gravityConstant = GRAVITATIONAL_CONSTANT;
 
 export const MatterLogger = logger.child({ module: "Matter Canvas" });
 const MovementLog = MatterLogger.child(
@@ -47,30 +52,20 @@ const MovementLog = MatterLogger.child(
     level: "info",
   },
 );
-const ROCKET_FORCE = 0.000000000001;
+const ROCKET_FORCE = 0.0000000001;
 
 export default function MatterTest() {
-  const [rocketVector, setRocketVector] = useState<Coordinates>({
-    x: 0,
-    y: 0,
-  });
   const theme = useTheme().theme;
   const windowSize = useWindowSize();
   const scene = useRef<HTMLDivElement>(null);
   const isPressed = useRef(false);
   const engine = useRef(Engine.create());
-  const balls = useRef<Matter.Body[]>([]);
   const contentRef = useRef<HTMLElement | null>(null);
   //const boundingBoxes = useRef<Matter.Body[]>([]);
   const contentBody = useRef<Matter.Body | null>(null);
   const render = useRef<Matter.Render>();
   const colors = useRef<number[]>([]);
   const eventCallbacks = useRef<(() => void)[]>([]);
-  const rocketMovement = useRef<Coordinates>({
-    x: 0,
-    y: 0,
-  });
-  const forceAppliedFn = useRef<() => void>();
   const solarBodies = useRef<SolarBodies>({
     sun: null,
     mercury: null,
@@ -81,7 +76,7 @@ export default function MatterTest() {
     asteroids: [],
   });
 
-  engine.current.timing.timeScale = 0.5;
+  engine.current.timing.timeScale = 0.01;
   engine.current.world.gravity.scale = 0;
 
   useEffect(() => {
@@ -110,16 +105,29 @@ export default function MatterTest() {
     console.log("Render context", render.current.context);
 
     const solarObjs = solarSystemObjects(cw, ch);
-    solarBodies.current = solarSystemObjects(cw, ch);
+    solarBodies.current = solarObjs;
+
+    const solarObjsArr = [
+      solarObjs.sun,
+      solarObjs.mercury,
+      solarObjs.venus,
+      solarObjs.earth,
+      solarObjs.rocket,
+      solarObjs.moon,
+      ...solarObjs.asteroids,
+    ];
+    const flatSolarObjs = objectToFlatArray<Body>(solarObjs);
 
     Composite.add(engine.current.world, [
       solarObjs.sun,
       solarObjs.mercury,
       solarObjs.venus,
       solarObjs.earth,
-      solarBodies.current.rocket!,
+      solarObjs.rocket,
       solarObjs.moon,
       ...solarObjs.asteroids,
+      solarObjs.mars,
+      solarObjs.jupiter,
     ]);
 
     console.log("Window", window.innerWidth, window.innerHeight);
@@ -138,22 +146,25 @@ export default function MatterTest() {
       });
     Composite.add(engine.current.world, mouseConstraint);
 
-    const solarObjsArr = [
-      solarObjs.sun,
-      solarObjs.mercury,
-      solarObjs.venus,
-      solarObjs.earth,
-      solarObjs.rocket,
-      solarObjs.moon,
-      ...solarObjs.asteroids,
-    ];
+    const centerX = cw / 2,
+      centerY = ch / 2;
     //const solarObjsArr = objectToFlatArray<Matter.Body>(solarObjs);
     const hoverLogging = (event: any) => {
       var foundPhysics = Matter.Query.point(solarObjsArr, event.mouse.position);
-      console.log("on hover event", foundPhysics[0]); //returns a shape corrisponding to the mouse position
+      if (foundPhysics.length === 0) return;
+      const x = foundPhysics[0].position.x,
+        y = foundPhysics[0].position.y;
+
+      const orbitalRadius = getRadiusFromPoints(x, y, centerX, centerY);
+
+      console.log(
+        "on hover event",
+        { orbitalRadius, x: Math.abs(x - centerX), y: Math.abs(y - centerY) },
+        foundPhysics[0].label,
+      ); //returns a shape corrisponding to the mouse position
     };
     console.log("Flattened solar objects", solarObjsArr);
-    //Matter.Events.on(mouseConstraint, "mousemove", hoverLogging); //returns a shape corrisponding to the mouse position
+    Matter.Events.on(mouseConstraint, "mousemove", hoverLogging); //returns a shape corrisponding to the mouse position
 
     render.current.mouse = Mouse.create(render.current.canvas);
     Runner.run(engine.current);
@@ -162,6 +173,10 @@ export default function MatterTest() {
       "All rendered bodies",
       Composite.allBodies(engine.current.world),
     );
+
+    const beforeRenderCallback = () => {
+      const scaleFactor = mouse.wheelDelta * -0.1;
+    };
 
     const moveKeySwitch = (e: any, fn: (direction: directionType) => void) => {
       e.key === "ArrowUp" && fn("up");

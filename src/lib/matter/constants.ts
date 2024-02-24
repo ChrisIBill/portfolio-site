@@ -10,3 +10,4 @@ export const collisionFilters = {
   mouse: 0x0008,
   content: 0x0016,
 } as const;
+export const GRAVITATIONAL_CONSTANT = 1 as const;

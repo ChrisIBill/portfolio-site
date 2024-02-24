@@ -1,3 +1,5 @@
+import { GRAVITATIONAL_CONSTANT } from "./matter/constants";
+
 export function getCircularReplacer() {
   const ancestors: any[] = [];
   return function (this: any, key: any, value: any) {
@@ -49,10 +51,26 @@ export function getPointOnCircle(radius: number, angle: number) {
     y: radius * Math.sin((Math.PI * 2 * angle) / 360),
   };
 }
+export function getRadiusFromPoints(
+  x: number,
+  y: number,
+  h: number,
+  k: number,
+) {
+  return Math.sqrt((x - h) ** 2 + (y - k) ** 2);
+}
 
-export function getOrbitalVelocity(mass: number, radius: number) {
+export function getOrbitalVelocity(
+  centerMass: number,
+  orbitingMass: number,
+  radius: number,
+) {
   //return Math.sqrt((6.674 * Math.pow(10, -2) * mass) / radius);
-  return Math.sqrt((mass * 0.2777) / radius); //* 0.527;
+  //return Math.sqrt((mass * 0.2777) / radius); //* 0.527;
+  //return Math.sqrt(((centerMass + orbitingMass) * 1.854) / radius); G,
+  return Math.sqrt(
+    ((centerMass + orbitingMass) * GRAVITATIONAL_CONSTANT * 277.961) / radius,
+  );
 }
 
 export function objectToFlatArray<T>(obj: any): T[] {
@@ -66,4 +84,19 @@ export function objectToFlatArray<T>(obj: any): T[] {
     }
   }
   return flatArray;
+}
+
+/**
+ * Standard Normal variate using Box-Muller transform.
+ *
+ * @param {number} [mean] - desired mean
+ * @param {number} [stdev] - desired standard deviation
+ * @returns {number} a random number with normal distribution over mean and stdev
+ */
+export function gaussianRandom(mean: number = 0, stdev: number = 1): number {
+  const u = 1 - Math.random(); // Converting [0,1) to (0,1]
+  const v = Math.random();
+  const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  // Transform to the desired mean and standard deviation:
+  return z * stdev + mean;
 }
