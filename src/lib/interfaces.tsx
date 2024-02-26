@@ -1,6 +1,12 @@
 export interface GenericKeyValueObject<T> {
   [key: string]: T;
 }
+export type OptionsFlags<K, T> = {
+  [Property in keyof K]: T;
+};
+export type UndefinedMap<K, E, T> = {
+  [Property in keyof E]: T;
+};
 export interface Coordinates {
   x: number;
   y: number;

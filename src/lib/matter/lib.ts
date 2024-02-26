@@ -16,6 +16,10 @@ export const getStandardGravitationalParameter = (
   centerMass: number,
   orbitingMass: number,
 ) => (centerMass + orbitingMass) * GRAVITATIONAL_CONSTANT * 277.777;
+export const getCircularOrbitalVelocity = (
+  stdGravParam: number,
+  radius: number,
+) => Math.sqrt(stdGravParam / radius);
 export function getEllipticalOrbitalVelocity(
   stdGravParam: number,
   radius: number,

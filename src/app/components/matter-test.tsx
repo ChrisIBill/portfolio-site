@@ -31,6 +31,7 @@ import {
 } from "@/lib/interfaces";
 import { getRadiusFromPoints } from "@/lib/geometry/lib";
 import pino from "pino";
+import AstronomicalBody from "@/lib/matter/astronomicalBody";
 
 Matter.use(MatterAttractors);
 MatterAttractors.Attractors.gravityConstant = GRAVITATIONAL_CONSTANT;
@@ -48,24 +49,19 @@ export default function MatterTest() {
   const theme = useTheme().theme;
   const windowSize = useWindowSize();
   const scene = useRef<HTMLDivElement>(null);
-  const isPressed = useRef(false);
   const engine = useRef(Engine.create());
-  const contentRef = useRef<HTMLElement | null>(null);
-  //const boundingBoxes = useRef<Matter.Body[]>([]);
-  const contentBody = useRef<Matter.Body | null>(null);
   const render = useRef<Matter.Render>();
-  const boundsMagnitude = useRef<Matter.Bounds>();
-  const colors = useRef<number[]>([]);
-  const selectedBody = useRef<Body>();
-  const solarBodies = useRef<SolarBodies>({
-    sun: null,
-    mercury: null,
-    venus: null,
-    earth: null,
-    rocket: null,
-    moon: null,
-    asteroids: [],
-  });
+  //  const selectedBody = useRef<Body>();
+  const SolarSystem = useRef<AstronomicalBody>();
+  //const solarBodies = useRef<SolarBodies>({
+  //  sun: null,
+  //  mercury: null,
+  //  venus: null,
+  //  earth: null,
+  //  rocket: null,
+  //  moon: null,
+  //  asteroids: [],
+  //});
 
   engine.current.timing.timeScale = 0.1;
   engine.current.world.gravity.scale = 0;
@@ -75,16 +71,6 @@ export default function MatterTest() {
     const ch = document.body.clientHeight;
     const centerX = cw / 2,
       centerY = ch / 2;
-    const viewportBounds = {
-      min: {
-        x: 0,
-        y: 0,
-      },
-      max: {
-        x: cw,
-        y: ch,
-      },
-    };
 
     if (scene.current === null) {
       MatterLogger.error({
@@ -108,36 +94,29 @@ export default function MatterTest() {
     });
     console.log("Render context", render.current.context);
 
-    const solarObjs = solarSystemObjects(cw, ch);
-    solarBodies.current = solarObjs;
+    SolarSystem.current = solarSystemObjects(cw, ch);
+    const SolarSystemMap = SolarSystem.current.getSystem();
+    const SolarSystemBodies = AstronomicalBody.bodies;
     MatterLogger.info({
       message: "SOLARS",
-      solarObjs: solarObjs,
+      solarObjs: SolarSystemBodies,
     });
 
-    const solarObjsArr = [
-      solarObjs.sun,
-      solarObjs.mercury,
-      solarObjs.venus,
-      solarObjs.earth,
-      //solarObjs.rocket,
-      solarObjs.moon,
-      //...solarObjs.asteroids,
-    ];
-    const flatSolarObjs = objectToFlatArray<Body>(solarObjs);
+    //const solarObjsArr = [
+    //  solarObjs.sun,
+    //  solarObjs.mercury,
+    //  solarObjs.venus,
+    //  solarObjs.earth,
+    //  //solarObjs.rocket,
+    //  solarObjs.moon,
+    //  ...solarObjs.asteroids,
+    //];
 
-    Composite.add(engine.current.world, [
-      solarObjs.sun,
-      solarObjs.mercury,
-      solarObjs.venus,
-      solarObjs.earth,
-      //solarObjs.rocket,
-      solarObjs.moon,
-      //...solarObjs.asteroids,
-      solarObjs.mars,
-      solarObjs.jupiter,
-    ]);
-    selectedBody.current = solarObjs.earth;
+    Composite.add(engine.current.world, SolarSystemBodies);
+    Render.lookAt(render.current, SolarSystem.current.getBody(), {
+      x: centerX,
+      y: centerY,
+    });
 
     console.log("Window", window.innerWidth, window.innerHeight);
     const mouse = Mouse.create(render.current.canvas),
@@ -155,9 +134,11 @@ export default function MatterTest() {
       });
     Composite.add(engine.current.world, mouseConstraint);
 
-    //const solarObjsArr = objectToFlatArray<Matter.Body>(solarObjs);
     const hoverLogging = (event: any) => {
-      var foundPhysics = Matter.Query.point(solarObjsArr, event.mouse.position);
+      var foundPhysics = Matter.Query.point(
+        SolarSystemBodies,
+        event.mouse.position,
+      );
       if (foundPhysics.length === 0) return;
       const x = foundPhysics[0].position.x,
         y = foundPhysics[0].position.y;
@@ -170,7 +151,7 @@ export default function MatterTest() {
         foundPhysics[0].label,
       ); //returns a shape corrisponding to the mouse position
     };
-    console.log("Flattened solar objects", solarObjsArr);
+    console.log("Flattened solar objects", SolarSystemBodies);
     Matter.Events.on(mouseConstraint, "mousemove", hoverLogging); //returns a shape corrisponding to the mouse position
 
     render.current.mouse = Mouse.create(render.current.canvas);
@@ -181,123 +162,123 @@ export default function MatterTest() {
       Composite.allBodies(engine.current.world),
     );
 
-    const beforeRenderCallback = () => {
-      if (!selectedBody.current) return;
-      const velocity = selectedBody.current.velocity;
-      velocity.x = velocity.x * 0.1;
-      velocity.y = velocity.y * 0.1;
+    //const beforeRenderCallback = () => {
+    //  if (!selectedBody.current) return;
+    //  const velocity = selectedBody.current.velocity;
+    //  velocity.x = velocity.x * 0.1;
+    //  velocity.y = velocity.y * 0.1;
 
-      if (render.current) {
-        Render.lookAt(
-          render.current,
-          selectedBody.current,
-          { x: cw, y: ch },
-          true,
-        );
-      }
-    };
-    Events.on(render.current, "beforeRender", beforeRenderCallback);
+    //  if (render.current) {
+    //    Render.lookAt(
+    //      render.current,
+    //      selectedBody.current,
+    //      { x: cw, y: ch },
+    //      true,
+    //    );
+    //  }
+    //};
+    //Events.on(render.current, "beforeRender", beforeRenderCallback);
 
-    const moveKeySwitch = (e: any, fn: (direction: directionType) => void) => {
-      e.key === "ArrowUp" && fn("up");
-      e.key === "ArrowDown" && fn("down");
-      e.key === "ArrowLeft" && fn("left");
-      e.key === "ArrowRight" && fn("right");
-    };
+    //const moveKeySwitch = (e: any, fn: (direction: directionType) => void) => {
+    //  e.key === "ArrowUp" && fn("up");
+    //  e.key === "ArrowDown" && fn("down");
+    //  e.key === "ArrowLeft" && fn("left");
+    //  e.key === "ArrowRight" && fn("right");
+    //};
 
-    const controlMovement = () => {
-      let prev: undefined | (() => void);
-      let vector: Coordinates = {
-        x: 0,
-        y: 0,
-      };
-      function forceApplied() {
-        if (!solarBodies.current.rocket) {
-          MovementLog.error({
-            message: "Rocket is null",
-            rocket: solarBodies.current.rocket,
-          });
-          return;
-        }
-        Body.applyForce(
-          solarBodies.current.rocket,
-          solarBodies.current.rocket.position,
-          Matter.Vector.create(
-            vector.x * ROCKET_FORCE,
-            vector.y * ROCKET_FORCE,
-          ),
-        );
-      }
+    //const controlMovement = () => {
+    //  let prev: undefined | (() => void);
+    //  let vector: Coordinates = {
+    //    x: 0,
+    //    y: 0,
+    //  };
+    //  function forceApplied() {
+    //    if (!solarBodies.current.rocket) {
+    //      MovementLog.error({
+    //        message: "Rocket is null",
+    //        rocket: solarBodies.current.rocket,
+    //      });
+    //      return;
+    //    }
+    //    Body.applyForce(
+    //      solarBodies.current.rocket,
+    //      solarBodies.current.rocket.position,
+    //      Matter.Vector.create(
+    //        vector.x * ROCKET_FORCE,
+    //        vector.y * ROCKET_FORCE,
+    //      ),
+    //    );
+    //  }
 
-      function clear() {
-        MovementLog.debug({ message: "Force Cleared" });
-        prev = undefined;
-        vector.x = 0;
-        vector.y = 0;
-        Events.off(engine.current, "beforeUpdate", forceApplied);
-      }
-      function callback(vec: Coordinates) {
-        MovementLog.debug({
-          message: "Control Movement Callback",
-          vec,
-          prev,
-          vector,
-        });
+    //  function clear() {
+    //    MovementLog.debug({ message: "Force Cleared" });
+    //    prev = undefined;
+    //    vector.x = 0;
+    //    vector.y = 0;
+    //    Events.off(engine.current, "beforeUpdate", forceApplied);
+    //  }
+    //  function callback(vec: Coordinates) {
+    //    MovementLog.debug({
+    //      message: "Control Movement Callback",
+    //      vec,
+    //      prev,
+    //      vector,
+    //    });
 
-        if (prev && (vector.x !== vec.x || vector.y !== vec.y)) {
-          MovementLog.debug({
-            message: "Clearing previous event",
-            rocket: solarBodies.current.rocket,
-          });
-          Events.off(engine.current, "beforeRender", prev);
-        } else if (vector.x === vec.x && vector.y === vec.y) {
-          MovementLog.debug({ message: "Vector unchanged, returning", vector });
-          return;
-        }
-        vector = {
-          x: ClampToRange(-1, 1, vector.x + vec.x),
-          y: ClampToRange(-1, 1, vector.y + vec.y),
-        };
-        if (!vector.x && !vector.y) {
-          MovementLog.debug({
-            message: "Vector is 0, halting acceleration",
-            vector,
-          });
-          Events.off(engine.current, "beforeUpdate", forceApplied);
-          prev = undefined;
-        } else {
-          prev = forceApplied;
-          MovementLog.debug({ message: "Vector changed", vector });
-          Events.on(engine.current, "beforeUpdate", forceApplied);
-        }
-      }
-      return {
-        callback,
-        clear,
-      };
-    };
-    const movementHandler = controlMovement();
-    const handleArrowKeysDown = (e: any) => {
-      function move(direction: directionType) {
-        console.log("Moving", direction);
-        const vector = directionToCoordsMap[direction];
-        movementHandler.callback(vector);
-      }
-      moveKeySwitch(e, move);
-    };
-    const handleArrowKeysUp = (e: any) => {
-      function endMove(direction: directionType) {
-        const vector = directionToCoordsMap[direction];
-        movementHandler.callback({
-          x: vector.x * -1,
-          y: vector.y * -1,
-        });
-      }
-      moveKeySwitch(e, endMove);
-    };
+    //    if (prev && (vector.x !== vec.x || vector.y !== vec.y)) {
+    //      MovementLog.debug({
+    //        message: "Clearing previous event",
+    //        rocket: solarBodies.current.rocket,
+    //      });
+    //      Events.off(engine.current, "beforeRender", prev);
+    //    } else if (vector.x === vec.x && vector.y === vec.y) {
+    //      MovementLog.debug({ message: "Vector unchanged, returning", vector });
+    //      return;
+    //    }
+    //    vector = {
+    //      x: ClampToRange(-1, 1, vector.x + vec.x),
+    //      y: ClampToRange(-1, 1, vector.y + vec.y),
+    //    };
+    //    if (!vector.x && !vector.y) {
+    //      MovementLog.debug({
+    //        message: "Vector is 0, halting acceleration",
+    //        vector,
+    //      });
+    //      Events.off(engine.current, "beforeUpdate", forceApplied);
+    //      prev = undefined;
+    //    } else {
+    //      prev = forceApplied;
+    //      MovementLog.debug({ message: "Vector changed", vector });
+    //      Events.on(engine.current, "beforeUpdate", forceApplied);
+    //    }
+    //  }
+    //  return {
+    //    callback,
+    //    clear,
+    //  };
+    //};
+    //const movementHandler = controlMovement();
+    //const handleArrowKeysDown = (e: any) => {
+    //  function move(direction: directionType) {
+    //    console.log("Moving", direction);
+    //    const vector = directionToCoordsMap[direction];
+    //    movementHandler.callback(vector);
+    //  }
+    //  moveKeySwitch(e, move);
+    //};
+    //const handleArrowKeysUp = (e: any) => {
+    //  function endMove(direction: directionType) {
+    //    const vector = directionToCoordsMap[direction];
+    //    movementHandler.callback({
+    //      x: vector.x * -1,
+    //      y: vector.y * -1,
+    //    });
+    //  }
+    //  moveKeySwitch(e, endMove);
+    //};
 
-    window.addEventListener("keydown", handleArrowKeysDown);
-    window.addEventListener("keyup", handleArrowKeysUp);
+    //window.addEventListener("keydown", handleArrowKeysDown);
+    //window.addEventListener("keyup", handleArrowKeysUp);
 
     return () => {
       console.log("Cleaning up Matter");
@@ -310,7 +291,7 @@ export default function MatterTest() {
       }
       render.current.canvas.remove();
       render.current.textures = {};
-      movementHandler.clear();
+      //movementHandler.clear();
       //render.current.element = null;
       console.log(
         "All rendered bodies on cleanup",
@@ -320,116 +301,85 @@ export default function MatterTest() {
 
       Engine.clear(engine.current);
 
-      solarObjs.asteroids = [];
-      window.removeEventListener("keydown", handleArrowKeysDown);
-      window.removeEventListener("keyup", handleArrowKeysUp);
+      //window.removeEventListener("keydown", handleArrowKeysDown);
+      //window.removeEventListener("keyup", handleArrowKeysUp);
     };
   }, []);
 
   //Handle window mounting and resizing
-  useEffect(() => {
-    const cw = document.body.clientWidth;
-    const ch = document.body.clientHeight;
-    MatterLogger.info({
-      message: "Resizing canvas",
-      windowSize: windowSize,
-      cw: cw,
-      ch: ch,
-    });
-    if (contentRef.current === null) {
-      contentRef.current = document.getElementById("collidable-wrapper");
-      if (contentRef.current === null) {
-        MatterLogger.error({
-          message: "Content ref is null during resize event",
-          contentRef: contentRef.current,
-        });
-        return;
-      }
-    }
-    if (!render.current) {
-      MatterLogger.error({
-        message: "Render is null during resize event",
-        render: render.current,
-      });
-      return;
-    }
-    if (contentBody.current) {
-      MatterLogger.info({
-        message: "Removing content body during resize event",
-        bodies: Composite.allBodies(engine.current.world),
-      });
-    }
-    const contentX =
-      contentRef.current.offsetLeft + contentRef.current.clientWidth / 2;
-    const contentY =
-      contentRef.current.getBoundingClientRect().top +
-      contentRef.current.clientHeight / 2;
+  //useEffect(() => {
+  //  const cw = document.body.clientWidth;
+  //  const ch = document.body.clientHeight;
+  //  MatterLogger.info({
+  //    message: "Resizing canvas",
+  //    windowSize: windowSize,
+  //    cw: cw,
+  //    ch: ch,
+  //  });
+  //  if (contentRef.current === null) {
+  //    contentRef.current = document.getElementById("collidable-wrapper");
+  //    if (contentRef.current === null) {
+  //      MatterLogger.error({
+  //        message: "Content ref is null during resize event",
+  //        contentRef: contentRef.current,
+  //      });
+  //      return;
+  //    }
+  //  }
+  //  if (!render.current) {
+  //    MatterLogger.error({
+  //      message: "Render is null during resize event",
+  //      render: render.current,
+  //    });
+  //    return;
+  //  }
+  //  if (contentBody.current) {
+  //    MatterLogger.info({
+  //      message: "Removing content body during resize event",
+  //      bodies: Composite.allBodies(engine.current.world),
+  //    });
+  //  }
+  //  const contentX =
+  //    contentRef.current.offsetLeft + contentRef.current.clientWidth / 2;
+  //  const contentY =
+  //    contentRef.current.getBoundingClientRect().top +
+  //    contentRef.current.clientHeight / 2;
 
-    // contentBody.current = Bodies.rectangle(
-    //   contentX,
-    //   contentY,
-    //   contentRef.current.getBoundingClientRect().width,
-    //   contentRef.current.clientHeight,
-    //   {
-    //     isStatic: true,
-    //     mass: 100,
-    //     collisionFilter: { category: collisionFilters.content },
-    //     plugin: {
-    //       attractors: [MatterAttractors.Attractors.gravity],
-    //     },
-    //     render: {
-    //       lineWidth: 2,
-    //       strokeStyle: "red",
-    //       fillStyle: "transparent",
-    //     },
-    //   },
-    // );
-    render.current.bounds.max.x = cw;
-    render.current.bounds.max.y = ch;
-    render.current.canvas.width = cw;
-    render.current.canvas.height = ch;
-    render.current.options.width = cw;
-    render.current.options.height = ch;
-    render.current.mouse = Mouse.create(render.current.canvas);
+  //  // contentBody.current = Bodies.rectangle(
+  //  //   contentX,
+  //  //   contentY,
+  //  //   contentRef.current.getBoundingClientRect().width,
+  //  //   contentRef.current.clientHeight,
+  //  //   {
+  //  //     isStatic: true,
+  //  //     mass: 100,
+  //  //     collisionFilter: { category: collisionFilters.content },
+  //  //     plugin: {
+  //  //       attractors: [MatterAttractors.Attractors.gravity],
+  //  //     },
+  //  //     render: {
+  //  //       lineWidth: 2,
+  //  //       strokeStyle: "red",
+  //  //       fillStyle: "transparent",
+  //  //     },
+  //  //   },
+  //  // );
+  //  render.current.bounds.max.x = cw;
+  //  render.current.bounds.max.y = ch;
+  //  render.current.canvas.width = cw;
+  //  render.current.canvas.height = ch;
+  //  render.current.options.width = cw;
+  //  render.current.options.height = ch;
+  //  render.current.mouse = Mouse.create(render.current.canvas);
 
-    Render.world(render.current);
-    //Composite.add(engine.current.world, [contentBody.current]);
-  }, [windowSize]);
+  //  Render.world(render.current);
+  //  //Composite.add(engine.current.world, [contentBody.current]);
+  //}, [windowSize]);
 
   // Handle theme changes
-  useEffect(() => {
-    MatterLogger.info({
-      message: "Updating ball colors",
-      colors: colors.current,
-      theme: theme,
-    });
-    // balls.current.forEach((ball, index) => {
-    //   ball.render.fillStyle =
-    //     theme === "dark"
-    //       ? darkColors[colors.current[index]]
-    //       : lightColors[colors.current[index]];
-    // });
-  }, [theme]);
-
-  const group = Body.nextGroup(true);
-
-  const handleHover = (e: any) => {
-    console.log("");
-  };
-  const handleDown = () => {
-    isPressed.current = true;
-  };
-  const handleUp = () => {
-    isPressed.current = false;
-  };
-
-  const handleClick = (e: any) => {};
 
   return (
     <div
-      onMouseDown={handleDown}
-      onMouseUp={handleUp}
-      onMouseMove={handleClick}
       style={{
         position: "fixed",
         top: 0,

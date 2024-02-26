@@ -11,7 +11,7 @@ import { Coordinates, GenericKeyValueObject } from "../interfaces";
 import logger from "../pino";
 import { collisionFilters } from "./constants";
 
-const SYSTEM_SCALE = 1 as const;
+const SYSTEM_SCALE = 0.2 as const;
 const AU_SCALE = 1000 as const;
 
 const genSolarBodies = {
@@ -37,6 +37,8 @@ const ROOT_ASTRONOMICAL_BODY = {
   semiMajorAxis: 0,
   radius: 0,
   velocity: { x: 0, y: 0 },
+  angle: 0,
+  position: { x: 0, y: 0 },
 };
 
 interface OrbitDetails {
@@ -59,7 +61,7 @@ interface CircularOrbitProps {
   velocity?: Coordinates;
   angle?: number;
 }
-interface EllipticalOrbitProps {
+export interface EllipticalOrbitProps {
   semiMajorAxis: number;
   apoapsis: number;
   periapsis: number;
@@ -92,12 +94,24 @@ interface RequiredAstronomicalBodyProps {
   radius: number;
   fillStyle: string;
   orbit: IOrbitProps;
+  sprite?: string;
+}
+
+export interface SolarObjectProps {
+  mass: number;
+  label: string;
+  radius: number;
+  fillStyle: string;
+  orbit: IOrbitProps;
+  sprite?: string;
+  isStatic?: boolean;
 }
 
 class AstronomicalBody implements IAstronomicalBody {
   private static DISTANCE_SCALE = SYSTEM_SCALE;
   private static MASS_SCALE = Math.sqrt(SYSTEM_SCALE);
-  static system: Body[] = [];
+  static system: Map<string, AstronomicalBody> = new Map();
+  static bodies: Body[] = [];
 
   label: string;
   mass: number;
@@ -106,6 +120,7 @@ class AstronomicalBody implements IAstronomicalBody {
   initialOrbit: OrbitDetails;
   fillStyle: string;
   body?: Body;
+  sprite?: string;
   centerBody?: AstronomicalBody;
   children: AstronomicalBody[];
   log: any;
@@ -116,6 +131,7 @@ class AstronomicalBody implements IAstronomicalBody {
   ) {
     this.mass = props.mass * AstronomicalBody.MASS_SCALE;
     this.label = props.label;
+    this.log = logger.child({ module: "Astronomical Body", label: this.label });
     this.radius = props.radius;
     this.fillStyle = props.fillStyle;
     this.centerBody = centerBody;
@@ -123,22 +139,24 @@ class AstronomicalBody implements IAstronomicalBody {
       centerBody?.mass ?? 0,
       this.mass,
     );
+    this.sprite = props.sprite;
     this.initialOrbit = this.generateInitialOrbitData(
       props.orbit as PartialOrbitDetails,
     );
     this.children = [];
-    this.log = logger.child({ module: "Astronomical Body", label: this.label });
   }
 
   getSystem(useCached = true) {
-    if (useCached && AstronomicalBody.system.length > 0)
+    if (useCached && AstronomicalBody.system.size > 0)
       return AstronomicalBody.system;
-    const system = [this.getBody()];
-    for (let i = 0; i < this.children.length; i++) {
-      system.push(...this.children[i].getSystem(false));
+    if (!AstronomicalBody.system.has(this.label)) {
+      AstronomicalBody.system.set(this.label, this);
+      AstronomicalBody.bodies.push(this.getBody());
     }
-    AstronomicalBody.system = system;
-    return system;
+    for (let i = 0; i < this.children.length; i++) {
+      this.children[i].getSystem(false);
+    }
+    return AstronomicalBody.system;
   }
   getSemiMajorAxis() {
     return this.initialOrbit.semiMajorAxis;
@@ -163,6 +181,18 @@ class AstronomicalBody implements IAstronomicalBody {
   }
   getBody() {
     if (!this.body) {
+      const render = {
+        sprite: this.sprite
+          ? {
+              texture: this.sprite,
+              xScale: 1,
+              yScale: 1,
+            }
+          : {
+              xScale: 1,
+              yScale: 1,
+            },
+      };
       this.body = Bodies.circle(
         this.initialOrbit.position.x,
         this.initialOrbit.position.y,
@@ -185,17 +215,11 @@ class AstronomicalBody implements IAstronomicalBody {
     this.children.push(child);
     return child;
   }
+  toJSON() {
+    JSON.stringify(this);
+  }
   private generateInitialOrbitData(args: PartialOrbitDetails): OrbitDetails {
-    for (const key in args) {
-      const value = args[key];
-      if (typeof value === "number")
-        args[key] = value * AstronomicalBody.DISTANCE_SCALE * AU_SCALE;
-      else if (value?.x && value?.y)
-        args[key] = {
-          x: value.x * AstronomicalBody.DISTANCE_SCALE * AU_SCALE,
-          y: value.y * AstronomicalBody.DISTANCE_SCALE * AU_SCALE,
-        };
-    }
+    const Scale = AU_SCALE * AstronomicalBody.DISTANCE_SCALE;
     this.log.debug({
       message: "Scaled Initial Orbit Data: ",
       args,
@@ -210,12 +234,26 @@ class AstronomicalBody implements IAstronomicalBody {
         ...args,
       } as OrbitDetails;
     }
+    //for (const key in args) {
+    //  const value = args[key];
+    //  if (typeof value === "number")
+    //    args[key] = value * AstronomicalBody.DISTANCE_SCALE * AU_SCALE;
+    //  else if (value?.x && value?.y)
+    //    args[key] = {
+    //      x: value.x * AstronomicalBody.DISTANCE_SCALE * AU_SCALE,
+    //      y: value.y * AstronomicalBody.DISTANCE_SCALE * AU_SCALE,
+    //    };
+    //}
 
     let velocity;
     args.angle = args.angle ?? getRandomArbitrary(0, 360);
     if (args.semiMajorAxis && args.periapsis && args.apoapsis) {
-      args.radius =
-        args.radius ?? getRandomArbitrary(args.periapsis, args.apoapsis);
+      args.semiMajorAxis *= Scale;
+      args.periapsis *= Scale;
+      args.apoapsis *= Scale;
+      args.radius = args.radius
+        ? args.radius * Scale
+        : getRandomArbitrary(args.periapsis, args.apoapsis);
       args.position = getPointOnCircle(args.radius, args.angle);
       if (!args.velocity) {
         velocity = getEllipticalOrbitalVelocity(
@@ -225,6 +263,7 @@ class AstronomicalBody implements IAstronomicalBody {
         );
       }
     } else if (args.radius) {
+      args.radius *= Scale;
       args.periapsis = args.radius;
       args.apoapsis = args.radius;
       args.semiMajorAxis = args.radius;
@@ -245,7 +284,7 @@ class AstronomicalBody implements IAstronomicalBody {
           -(velocity * args.position.y) / args.radius! +
           (this.centerBody?.body?.velocity.x ?? 0),
         y:
-          -(velocity * args.position.x) / args.radius! +
+          (velocity * args.position.x) / args.radius! +
           (this.centerBody?.body?.velocity.y ?? 0),
       };
     } else
@@ -256,6 +295,12 @@ class AstronomicalBody implements IAstronomicalBody {
       message: "Calculated Initial Orbit Data: ",
       args,
     });
+    args.velocity.x += this.centerBody?.initialOrbit.velocity.x ?? 0;
+    args.velocity.y += this.centerBody?.initialOrbit.velocity.y ?? 0;
+    args.position.x += this.centerBody?.initialOrbit.position.x ?? 0;
+    args.position.y += this.centerBody?.initialOrbit.position.y ?? 0;
     return args as unknown as OrbitDetails;
   }
 }
+
+export default AstronomicalBody;
