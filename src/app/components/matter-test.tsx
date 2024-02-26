@@ -1,32 +1,21 @@
 "use client";
 import { useEffect, useRef, memo, useState } from "react";
-import Matter from "matter-js";
+import Matter, { Bounds, Vector } from "matter-js";
 import {
   Engine,
   Render,
   Body,
-  Bodies,
   Composite,
   Mouse,
   MouseConstraint,
-  Constraint,
   Runner,
   Events,
-  Common,
 } from "matter-js";
 import MatterAttractors from "matter-attractors";
-//import MatterWrap from "matter-wrap";
 import logger from "@/lib/pino";
 import { useTheme } from "next-themes";
 import { useWindowSize } from "@/lib/hooks/resize";
-import {
-  ClampToRange,
-  getOrbitalVelocity,
-  getPointOnCircle,
-  getRadiusFromPoints,
-  getRandomArbitrary,
-  objectToFlatArray,
-} from "@/lib/lib";
+import { ClampToRange, objectToFlatArray, thisTester } from "@/lib/lib";
 import {
   GRAVITATIONAL_CONSTANT,
   collisionFilters,
@@ -40,6 +29,7 @@ import {
   directionToCoordsMap,
   directionType,
 } from "@/lib/interfaces";
+import { getRadiusFromPoints } from "@/lib/geometry/lib";
 import pino from "pino";
 
 Matter.use(MatterAttractors);
@@ -64,8 +54,9 @@ export default function MatterTest() {
   //const boundingBoxes = useRef<Matter.Body[]>([]);
   const contentBody = useRef<Matter.Body | null>(null);
   const render = useRef<Matter.Render>();
+  const boundsMagnitude = useRef<Matter.Bounds>();
   const colors = useRef<number[]>([]);
-  const eventCallbacks = useRef<(() => void)[]>([]);
+  const selectedBody = useRef<Body>();
   const solarBodies = useRef<SolarBodies>({
     sun: null,
     mercury: null,
@@ -76,12 +67,24 @@ export default function MatterTest() {
     asteroids: [],
   });
 
-  engine.current.timing.timeScale = 0.01;
+  engine.current.timing.timeScale = 0.1;
   engine.current.world.gravity.scale = 0;
 
   useEffect(() => {
     const cw = document.body.clientWidth;
     const ch = document.body.clientHeight;
+    const centerX = cw / 2,
+      centerY = ch / 2;
+    const viewportBounds = {
+      min: {
+        x: 0,
+        y: 0,
+      },
+      max: {
+        x: cw,
+        y: ch,
+      },
+    };
 
     if (scene.current === null) {
       MatterLogger.error({
@@ -98,6 +101,7 @@ export default function MatterTest() {
         height: ch,
         wireframes: false,
         background: "transparent",
+        hasBounds: true,
         //showBounds: true,
         showDebug: true,
       },
@@ -106,15 +110,19 @@ export default function MatterTest() {
 
     const solarObjs = solarSystemObjects(cw, ch);
     solarBodies.current = solarObjs;
+    MatterLogger.info({
+      message: "SOLARS",
+      solarObjs: solarObjs,
+    });
 
     const solarObjsArr = [
       solarObjs.sun,
       solarObjs.mercury,
       solarObjs.venus,
       solarObjs.earth,
-      solarObjs.rocket,
+      //solarObjs.rocket,
       solarObjs.moon,
-      ...solarObjs.asteroids,
+      //...solarObjs.asteroids,
     ];
     const flatSolarObjs = objectToFlatArray<Body>(solarObjs);
 
@@ -123,12 +131,13 @@ export default function MatterTest() {
       solarObjs.mercury,
       solarObjs.venus,
       solarObjs.earth,
-      solarObjs.rocket,
+      //solarObjs.rocket,
       solarObjs.moon,
-      ...solarObjs.asteroids,
+      //...solarObjs.asteroids,
       solarObjs.mars,
       solarObjs.jupiter,
     ]);
+    selectedBody.current = solarObjs.earth;
 
     console.log("Window", window.innerWidth, window.innerHeight);
     const mouse = Mouse.create(render.current.canvas),
@@ -146,8 +155,6 @@ export default function MatterTest() {
       });
     Composite.add(engine.current.world, mouseConstraint);
 
-    const centerX = cw / 2,
-      centerY = ch / 2;
     //const solarObjsArr = objectToFlatArray<Matter.Body>(solarObjs);
     const hoverLogging = (event: any) => {
       var foundPhysics = Matter.Query.point(solarObjsArr, event.mouse.position);
@@ -175,8 +182,21 @@ export default function MatterTest() {
     );
 
     const beforeRenderCallback = () => {
-      const scaleFactor = mouse.wheelDelta * -0.1;
+      if (!selectedBody.current) return;
+      const velocity = selectedBody.current.velocity;
+      velocity.x = velocity.x * 0.1;
+      velocity.y = velocity.y * 0.1;
+
+      if (render.current) {
+        Render.lookAt(
+          render.current,
+          selectedBody.current,
+          { x: cw, y: ch },
+          true,
+        );
+      }
     };
+    Events.on(render.current, "beforeRender", beforeRenderCallback);
 
     const moveKeySwitch = (e: any, fn: (direction: directionType) => void) => {
       e.key === "ArrowUp" && fn("up");

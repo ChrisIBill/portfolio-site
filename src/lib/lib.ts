@@ -1,5 +1,3 @@
-import { GRAVITATIONAL_CONSTANT } from "./matter/constants";
-
 export function getCircularReplacer() {
   const ancestors: any[] = [];
   return function (this: any, key: any, value: any) {
@@ -45,34 +43,6 @@ export function shiftValueToRange(
   return ((oldValue - oldMin) * (newMax - newMin)) / (oldMax - oldMin) + newMin;
 }
 
-export function getPointOnCircle(radius: number, angle: number) {
-  return {
-    x: radius * Math.cos((Math.PI * 2 * angle) / 360),
-    y: radius * Math.sin((Math.PI * 2 * angle) / 360),
-  };
-}
-export function getRadiusFromPoints(
-  x: number,
-  y: number,
-  h: number,
-  k: number,
-) {
-  return Math.sqrt((x - h) ** 2 + (y - k) ** 2);
-}
-
-export function getOrbitalVelocity(
-  centerMass: number,
-  orbitingMass: number,
-  radius: number,
-) {
-  //return Math.sqrt((6.674 * Math.pow(10, -2) * mass) / radius);
-  //return Math.sqrt((mass * 0.2777) / radius); //* 0.527;
-  //return Math.sqrt(((centerMass + orbitingMass) * 1.854) / radius); G,
-  return Math.sqrt(
-    ((centerMass + orbitingMass) * GRAVITATIONAL_CONSTANT * 277.961) / radius,
-  );
-}
-
 export function objectToFlatArray<T>(obj: any): T[] {
   const flatArray: any[] = [];
   for (const key in obj) {
@@ -99,4 +69,23 @@ export function gaussianRandom(mean: number = 0, stdev: number = 1): number {
   const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
   // Transform to the desired mean and standard deviation:
   return z * stdev + mean;
+}
+
+export function memoize<T>(fn: () => T) {
+  const cache = new Map();
+
+  return function (this: any, ...args: any) {
+    const key = JSON.stringify(args);
+
+    if (cache.has(key)) return cache.get(key);
+
+    const result = fn.apply(this, args);
+    cache.set(key, result);
+
+    return result;
+  };
+}
+
+export function thisTester(this: any) {
+  console.log("Testing this context", this);
 }
