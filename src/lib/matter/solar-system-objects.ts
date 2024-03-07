@@ -31,7 +31,7 @@ export type SolarBodies = {
 };
 
 const SUN_PROPS: SolarObjectProps = {
-  radius: 20,
+  radius: 100,
   mass: 33300,
   label: "SUN",
   fillStyle: "yellow",
@@ -45,6 +45,7 @@ const SUN_PROPS: SolarObjectProps = {
     velocity: { x: 0, y: 0 },
   },
 } as const;
+
 const MERCURY_PROPS = {
   radius: 4,
   label: "MERCURY",
@@ -56,6 +57,7 @@ const MERCURY_PROPS = {
     apoapsis: 0.466697,
   },
 } as const;
+
 const VENUS_PROPS: SolarObjectProps = {
   radius: 9.5,
   orbit: {
@@ -68,6 +70,7 @@ const VENUS_PROPS: SolarObjectProps = {
   mass: 8.5, //0.85 earth
   fillStyle: "orange",
 } as const;
+
 const EARTH_PROPS: SolarObjectProps = {
   radius: 1,
   orbit: {
@@ -79,6 +82,7 @@ const EARTH_PROPS: SolarObjectProps = {
   label: "EARTH",
   fillStyle: "blue",
 } as const;
+
 const ROCKET_PROPS: SolarObjectProps = {
   radius: 2,
   orbit: {
@@ -91,7 +95,7 @@ const ROCKET_PROPS: SolarObjectProps = {
   fillStyle: "black",
 } as const;
 const MOON_PROPS: SolarObjectProps = {
-  radius: 1,
+  radius: 0.5,
   orbit: {
     semiMajorAxis: 0.002569 * 5,
     apoapsis: 0.00271 * 5,
@@ -123,6 +127,40 @@ const JUPITER_PROPS = {
   mass: 100,
   fillStyle: "orange",
 } as const;
+const SATURN_PROPS = {
+  orbit: {
+    semiMajorAxis: 9.5826,
+    apoapsis: 10.1238,
+    periapsis: 9.0412,
+  },
+  radius: 9.14,
+  label: "SATURN",
+  mass: 95.162,
+  fillStyle: "yellow",
+} as const;
+const URANUS_PROPS = {
+  orbit: {
+    semiMajorAxis: 19.191,
+    apoapsis: 20.0965,
+    periapsis: 18.2861,
+  },
+  radius: 3.981,
+  label: "URANUS",
+  mass: 14.536,
+  fillStyle: "blue",
+} as const;
+const NEPTUNE_PROPS = {
+  orbit: {
+    semiMajorAxis: 30.07,
+    periapsis: 29.81,
+    apoapsis: 30.33,
+    direction: -1,
+  },
+  radius: 3.865,
+  label: "NEPTUNE",
+  mass: 17.147,
+  fillStyle: "blue",
+};
 
 const genSolarBodies = {
   isStatic: false,
@@ -252,27 +290,13 @@ export const solarSystemObjects = (cw: number, ch: number) => {
   EarthSystem.generateChild(MOON_PROPS);
   SolarSystem.generateChild(MARS_PROPS);
   SolarSystem.generateChild(JUPITER_PROPS);
-  //const sunBody = generateAstronomicalBodies(SUN_PROPS, undefined, centerPoint);
-  //const sun = sunBody.body;
-  //const generateSolarOrbitals = sunBody.generateChildBodies;
-  //const genMercury = generateSolarOrbitals(MERCURY_PROPS);
-  //const mercury = genMercury.body;
-  //const genVenus = generateSolarOrbitals(VENUS_PROPS);
-  //const venus = genVenus.body;
-  //const genEarth = generateSolarOrbitals(EARTH_PROPS);
-  //const earth = genEarth.body;
-  //const genMoon = genEarth.generateChildBodies(MOON_PROPS);
-  //const moon = genMoon.body;
-  //const genMars = generateSolarOrbitals(MARS_PROPS);
-  //const mars = genMars.body;
-  //const genJupiter = generateSolarOrbitals(JUPITER_PROPS);
-  //const jupiter = genJupiter.body;
+  SolarSystem.generateChild(SATURN_PROPS);
+  SolarSystem.generateChild(URANUS_PROPS);
 
-  //const asteroids: AstronomicalBody[] = [];
   const generateAsteroid = (index: number) => {
-    let apoapsis = gaussianRandom(2.9, 0.3);
-    let periapsis = gaussianRandom(2.3, 0.3);
-    const radius = 1 + Math.random() * 2;
+    let apoapsis = gaussianRandom(3.5, 0.7);
+    let periapsis = gaussianRandom(2.3, 0.4);
+    const radius = (1 + Math.random() * 2) * 0.1;
     const mass = 0.0005 * radius ** 2;
     if (apoapsis < periapsis) {
       const temp = apoapsis;
@@ -283,64 +307,15 @@ export const solarSystemObjects = (cw: number, ch: number) => {
       label: "asteroid" + index,
       mass: mass,
       radius: radius,
-      fillStyle: "gray",
+      fillStyle: "white",
       orbit: {
         semiMajorAxis: (apoapsis + periapsis) / 2,
         apoapsis: apoapsis,
         periapsis: periapsis,
       },
     });
-    //const semiMajorAxis = (apoapsis + periapsis) / 2;
-    //const orbitalRadius = getRandomArbitrary(periapsis, apoapsis);
-    ////const orbitalRadius = 1100 + Math.random() * 500;
-    //const angle = Math.random() * 360;
-    //const position = {
-    //  x: orbitalRadius * Math.cos((Math.PI * 2 * angle) / 360),
-    //  y: orbitalRadius * Math.sin((Math.PI * 2 * angle) / 360),
-    //};
-    ////const position = getPointOnCircle(angle, orbitalRadius);
-    //console.log("Asteroid: ", position);
-    //const positionX = sun.position.x + position.x;
-    //const positionY = sun.position.y + position.y;
-    //const body = Bodies.circle(positionX, positionY, radius, {
-    //  ...genSolarBodies,
-    //  isStatic: false,
-    //  mass: mass,
-    //  label: "asteroid " + index,
-    //  render: {
-    //    fillStyle: "gray",
-    //  },
-    //});
-    //const velocity = getEllipticalOrbitalVelocity(
-    //  getStandardGravitationalParameter(sun.mass, mass),
-    //  orbitalRadius,
-    //  semiMajorAxis,
-    //);
-    //const xVelocity = (velocity * position.y) / orbitalRadius;
-    //const yVelocity = (velocity * position.x) / orbitalRadius;
-    //SolarBodiesLog.debug({
-    //  message: "Asteroid Stats: ",
-    //  angle,
-    //  position,
-    //  positionX,
-    //  positionY,
-    //  velocity,
-    //  xVelocity,
-    //  yVelocity,
-    //  apoapsis,
-    //  periapsis,
-    //  semiMajorAxis,
-    //  orbitalRadius,
-    //});
-    //Body.setVelocity(body, {
-    //  x: -xVelocity,
-    //  y: yVelocity,
-    //});
-    //SolarBodiesLog.debug({ message: "Asteroid Object", body });
-    //asteroids.push(body);
   };
-
-  for (let i = 0; i < 150; i++) {
+  for (let i = 0; i < 200; i++) {
     generateAsteroid(i);
   }
   // const rocket = Bodies.circle(0, 0, 0, {

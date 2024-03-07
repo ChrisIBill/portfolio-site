@@ -79,7 +79,6 @@ interface IAstronomicalBody {
   getApoapsis: () => number;
   getPeriapsis: () => number;
   getOrbitalPeriod: () => number;
-  getVelocity: () => Coordinates;
   getOrbitalRadius: () => number;
   getBody: () => Body;
   getParentBody: () => Body | undefined;
@@ -113,8 +112,13 @@ class AstronomicalBody implements IAstronomicalBody {
   static system: Map<string, AstronomicalBody> = new Map();
   static bodies: Body[] = [];
 
+  static findSystem(label: string) {
+    return AstronomicalBody.system.get(label);
+  }
+
   label: string;
   mass: number;
+  element?: React.ReactElement;
   radius: number;
   stdGravParam: (() => number) | number;
   initialOrbit: OrbitDetails;
@@ -128,10 +132,12 @@ class AstronomicalBody implements IAstronomicalBody {
   constructor(
     props: RequiredAstronomicalBodyProps,
     centerBody?: AstronomicalBody,
+    element?: React.ReactElement,
   ) {
     this.mass = props.mass * AstronomicalBody.MASS_SCALE;
     this.label = props.label;
     this.log = logger.child({ module: "Astronomical Body", label: this.label });
+    this.element = element;
     this.radius = props.radius;
     this.fillStyle = props.fillStyle;
     this.centerBody = centerBody;
@@ -170,9 +176,6 @@ class AstronomicalBody implements IAstronomicalBody {
   getOrbitalPeriod() {
     return 0;
   }
-  getVelocity() {
-    return this.initialOrbit.velocity;
-  }
   getOrbitalRadius() {
     return this.initialOrbit.radius;
   }
@@ -210,8 +213,11 @@ class AstronomicalBody implements IAstronomicalBody {
     }
     return this.body;
   }
-  generateChild(props: RequiredAstronomicalBodyProps) {
-    const child = new AstronomicalBody(props, this);
+  generateChild(
+    props: RequiredAstronomicalBodyProps,
+    element?: React.ReactElement,
+  ) {
+    const child = new AstronomicalBody(props, this, element);
     this.children.push(child);
     return child;
   }
@@ -234,16 +240,6 @@ class AstronomicalBody implements IAstronomicalBody {
         ...args,
       } as OrbitDetails;
     }
-    //for (const key in args) {
-    //  const value = args[key];
-    //  if (typeof value === "number")
-    //    args[key] = value * AstronomicalBody.DISTANCE_SCALE * AU_SCALE;
-    //  else if (value?.x && value?.y)
-    //    args[key] = {
-    //      x: value.x * AstronomicalBody.DISTANCE_SCALE * AU_SCALE,
-    //      y: value.y * AstronomicalBody.DISTANCE_SCALE * AU_SCALE,
-    //    };
-    //}
 
     let velocity;
     args.angle = args.angle ?? getRandomArbitrary(0, 360);
