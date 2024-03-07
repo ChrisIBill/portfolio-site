@@ -1,5 +1,5 @@
 import { infolog } from "@/lib/pino";
-import { AboutSection } from "../components/about-section";
+import { AboutSection } from "@/components/about-section";
 
 /* eslint-disable react/no-unescaped-entities */
 

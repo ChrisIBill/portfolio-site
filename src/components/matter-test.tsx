@@ -32,6 +32,7 @@ import {
 import { getRadiusFromPoints } from "@/lib/geometry/lib";
 import pino from "pino";
 import AstronomicalBody from "@/lib/matter/astronomicalBody";
+import { EarthComponent } from "./astronomical-bodies/earth";
 
 Matter.use(MatterAttractors);
 MatterAttractors.Attractors.gravityConstant = GRAVITATIONAL_CONSTANT;
@@ -386,7 +387,9 @@ export default function MatterTest() {
         left: 0,
       }}
     >
-      <div ref={scene} style={{ width: "100vw", height: "100vh" }} />
+      <div ref={scene} style={{ width: "100vw", height: "100vh" }}>
+        {/* <EarthComponent obj={AstronomicalBody.findSystem("EARTH")} /> */}
+      </div>
     </div>
   );
 }
