@@ -56,7 +56,6 @@ export function NavigationProvider({
         url,
         delay,
       });
-      router.prefetch(url);
       return new Promise((resolve) => {
         NavigationProviderLog.debug("asyncDelayFn resolved promise");
         return setTimeout(() => {
@@ -185,6 +184,11 @@ export function NavigationProvider({
       ) as InternalLinkType,
     };
   }, [pathname]);
+
+  useEffect(() => {
+    router.prefetch(pageRefs.current.prev);
+    router.prefetch(pageRefs.current.next);
+  }, [pageRefs.current.prev, pageRefs.current.next]);
 
   return (
     <NavigationContext.Provider

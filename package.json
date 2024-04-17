@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "json-logger INFO 'running dev' | tee -a pino.log.out.json pino.log.server.json pino.log.info.json pino.log.client.json && next dev -p 4000 | pino-pretty -c -t",
+    "dev": "REACT_APP_API_PATH=4000 && json-logger INFO 'running dev' | tee -a pino.log.out.json pino.log.server.json pino.log.info.json pino.log.client.json && next dev -p $REACT_APP_API_PATH | pino-pretty -c -t",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

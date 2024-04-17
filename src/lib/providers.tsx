@@ -5,8 +5,8 @@ import { NextUIProvider } from "@nextui-org/react";
 import { ThemeProvider } from "next-themes";
 import { useRouter } from "next/navigation";
 import { IconContext } from "react-icons";
-import { NavigationProvider } from "@/app/components/navigation-provider";
 import { infolog } from "./pino";
+import { NavigationProvider } from "@/components/navigation-provider";
 
 export function Providers({
   children,

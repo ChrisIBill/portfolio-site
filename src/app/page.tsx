@@ -1,6 +1,6 @@
+import MatterTest from "@/components/matter-test";
 import { infolog } from "@/lib/pino";
-import BioComponent from "./components/bio";
-import MatterTest from "@/app/components/matter-test";
+import BioComponent from "@/components/bio";
 
 export const metadata = {
   title: {
@@ -20,7 +20,7 @@ export default function Home() {
       >
         <BioComponent />
       </div>
-      <MatterTest />
+      {/* <MatterTest /> */}
     </div>
   );
 }

@@ -2,12 +2,12 @@ import type { Metadata, Viewport } from "next";
 import { Lato } from "next/font/google";
 import "./globals.scss";
 import { Providers } from "@/lib/providers";
-import Footer from "./components/footer";
-import NextHeader from "./components/header";
 import GoogleAnalytics from "./google-analytics";
-import SwipeableLayer from "./components/swipeable-layer";
-import CustomPagination from "./components/pagination";
 import { infolog } from "@/lib/pino";
+import SwipeableLayer from "@/components/swipeable-layer";
+import NextHeader from "@/components/header";
+import Footer from "@/components/footer";
+import CustomPagination from "@/components/pagination";
 
 const font = Lato({ weight: "400", subsets: ["latin"] });
 
