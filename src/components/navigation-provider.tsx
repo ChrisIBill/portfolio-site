@@ -3,7 +3,12 @@ import {
   NavigationContext,
   NavigationDirection,
 } from "@/lib/navigation-context";
-import { InternalLinkType, InternalLinks, isInternalLink } from "./links";
+import {
+  InternalLink,
+  InternalLinkType,
+  InternalLinks,
+  isInternalLink,
+} from "./links";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import logger from "@/lib/pino";
@@ -42,7 +47,7 @@ export function NavigationProvider({
   const [currentPage, setCurrentPage] = useState<InternalLinkType>(
     pathname as InternalLinkType,
   );
-  const requestedPage = useRef<InternalLinkType>("/");
+  const requestedPage = useRef<InternalLinkType>(InternalLink.Home);
   const [swipePosition, setSwipePosition] = useState(0);
 
   const asyncDelayRouterSwitch = useCallback(
@@ -203,6 +208,7 @@ export function NavigationProvider({
         handleRouteRequest,
         swipePosition,
         setSwipePosition,
+        routeIndex: InternalLinks.indexOf(currentPage),
       }}
     >
       {children}
