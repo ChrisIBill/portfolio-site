@@ -116,9 +116,9 @@ export function NavigationProvider({
     if (!isInternalLink(route))
       throw new Error("Invalid route", { cause: route });
     if (route === pageRefs.current.next)
-      setAnimationString("animate-slideOutLeft");
-    else if (route === pageRefs.current.prev)
       setAnimationString("animate-slideOutRight");
+    else if (route === pageRefs.current.prev)
+      setAnimationString("animate-slideOutLeft");
     else setAnimationString("animate-fadeOut");
     requestedPage.current = route;
   }, []);

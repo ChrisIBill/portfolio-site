@@ -76,9 +76,9 @@ const SwipeableLayer = (props: {
     if (animateNavigation) return;
     setSwipePosition(overScroll);
     if (overScroll <= -50) {
-      handleRouteChange("next");
-    } else if (overScroll >= 50) {
       handleRouteChange("prev");
+    } else if (overScroll >= 50) {
+      handleRouteChange("next");
     }
   }, [overScroll]);
 
