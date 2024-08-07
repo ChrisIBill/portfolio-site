@@ -11,9 +11,9 @@ import {
 
 import { memo, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { HeaderLog } from "./header";
+import logger from "@/lib/pino";
 
-const HeaderMenuLog = HeaderLog.child({
+const HeaderMenuLog = logger.child({
   path: "NavbarMenu",
   component: "Menu",
 });

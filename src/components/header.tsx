@@ -1,3 +1,4 @@
+"use client";
 import { GenericKeyValueObject } from "@/lib/interfaces";
 import { usePathname } from "next/navigation";
 import ThemeSwitcher from "./theme/theme-switcher";
