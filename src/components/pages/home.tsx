@@ -1,3 +1,4 @@
+import { Skeleton } from "@nextui-org/react";
 import BioComponent from "../bio";
 
 export default function HomeComponent() {
@@ -13,3 +14,14 @@ export default function HomeComponent() {
     </div>
   );
 }
+
+export const HomeSkeleton = () => {
+  return (
+    <Skeleton>
+      <div
+        className="box-border px-4 sm:px-24
+            min-h-fit w-screen flex flex-1 flex-col items-center justify-around"
+      />
+    </Skeleton>
+  );
+};

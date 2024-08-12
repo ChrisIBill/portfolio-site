@@ -1,4 +1,4 @@
-import { Divider, Link } from "@nextui-org/react";
+import { Divider, Link, Skeleton } from "@nextui-org/react";
 import { TiWeatherDownpour } from "react-icons/ti";
 import { PiGlobeBold } from "react-icons/pi";
 import { infolog } from "@/lib/pino";
@@ -74,5 +74,16 @@ const ProjectContentComponent: React.FC<ProjectContentComponentProps> = (
         </div>
       </div>
     </div>
+  );
+};
+
+export const ProjectsSkeleton = () => {
+  return (
+    <Skeleton>
+      <div
+        className="box-border px-4 sm:px-24
+            min-h-fit w-screen flex flex-1 flex-col items-center justify-around"
+      />
+    </Skeleton>
   );
 };
