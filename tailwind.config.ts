@@ -1,80 +1,102 @@
-import { EXTRA_SMALL } from './src/lib/constants'
-import { nextui } from '@nextui-org/react'
-import type { Config } from 'tailwindcss'
-import defaultTheme from 'tailwindcss/defaultTheme'
-
+import { EXTRA_SMALL } from "./src/lib/constants";
+import { nextui } from "@nextui-org/react";
+import type { Config } from "tailwindcss";
+import defaultTheme from "tailwindcss/defaultTheme";
 
 const config: Config = {
-    darkMode: 'class',
-    content: [
-        './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-        './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-        './src/app/**/*.{js,ts,jsx,tsx,mdx}',
-        "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
-    ],
-    theme: {
-        screens: {
-            'xs': `${EXTRA_SMALL}px`,
-            ...defaultTheme.screens,
-        },
-        extend: {
-            dropShadow: {
-                glow: [
-                    "0 0px 20px rgba(255,255, 255, 0.35)",
-                    "0 0px 65px rgba(255, 255,255, 0.2)"
-                ]
-            },
-            keyframes: {
-                fadeIn: {
-                    '0%': { opacity: '0' },
-                    '100%': { opacity: '1' },
-                },
-                slideInLeft: {
-                    '0%': { transform: 'translateX(-150%)' },
-                    '100%': { transform: 'translateX(0)' },
-                },
-                slideInRight: {
-                    '0%': { transform: 'translateX(150%)' },
-                    '100%': { transform: 'translateX(0)' },
-                },
-                slideOutLeft: {
-                    '0%': { transform: 'translateX(0)' },
-                    '100%': { transform: 'translateX(-150%)' },
-                },
-                slideOutRight: {
-                    '0%': { transform: 'translateX(0)' },
-                    '100%': { transform: 'translateX(150%)' },
-                },
-                wiggle: {
-                    '0%, 100%': { transform: 'rotate(-3deg)' },
-                    '50%': { transform: 'rotate(3deg)' },
-                },
-                scaleUp: {
-                    '0%': { transform: 'scale(0)' },
-                    '100%': { transform: 'scale(1)' },
-                }
-            },
-            animation: {
-                fadeIn: 'fadeIn 1s ease-in-out',
-                slideInLeft: 'slideInLeft 1s ease-in-out',
-                slideInRight: 'slideInRight 1s ease-in-out',
-                slideOutLeft: 'slideOutLeft 1s ease-in-out forwards',
-                slideOutRight: 'slideOutRight 1s ease-in-out forwards',
-                wiggle: 'wiggle 1s ease-in-out infinite',
-                scaleUp: 'scaleUp 1s ease-in-out',
-            },
-            backgroundImage: {
-                'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-                'gradient-conic':
-                    'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-            },
-        },
+  darkMode: "class",
+  content: [
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
+    "./node_modules/@nextui-org/theme/dist/components/[object Object].js",
+  ],
+  theme: {
+    screens: {
+      xs: `${EXTRA_SMALL}px`,
+      ...defaultTheme.screens,
     },
-    plugins: [nextui({
-        addCommonColors: true,
-        layout: {
-            disabledOpacity: 1.0,
-        }
-    })],
-}
-export default config
+    extend: {
+      dropShadow: {
+        glow: [
+          "0 0px 20px rgba(255,255, 255, 0.35)",
+          "0 0px 65px rgba(255, 255,255, 0.2)",
+        ],
+      },
+      keyframes: {
+        fadeIn: {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        slideInDown: {
+          "0%": { transform: "translateY(100%)" },
+          "100%": { transform: "translateY(0)" },
+        },
+        slideInUp: {
+          "0%": { transform: "translateY(-100%)" },
+          "100%": { transform: "translateY(0)" },
+        },
+        slideInLeft: {
+          "0%": { transform: "translateX(-150%)" },
+          "100%": { transform: "translateX(0)" },
+        },
+        slideInRight: {
+          "0%": { transform: "translateX(150%)" },
+          "100%": { transform: "translateX(0)" },
+        },
+        slideOutDown: {
+          "0%": { transform: "translateY(0)" },
+          "100%": { transform: "translateY(-100%)" },
+        },
+        slideOutUp: {
+          "0%": { transform: "translateY(0)" },
+          "100%": { transform: "translateY(100%)" },
+        },
+        slideOutLeft: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-150%)" },
+        },
+        slideOutRight: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(150%)" },
+        },
+        wiggle: {
+          "0%, 100%": { transform: "rotate(-3deg)" },
+          "50%": { transform: "rotate(3deg)" },
+        },
+        scaleUp: {
+          "0%": { transform: "scale(0)" },
+          "100%": { transform: "scale(1)" },
+        },
+      },
+      animation: {
+        fadeIn: "fadeIn 1s ease-in-out",
+        slideInDown: "slideInDown 1s ease-in-out",
+        slideInUp: "slideInUp 1s ease-in-out",
+        slideInLeft: "slideInLeft 1s ease-in-out",
+        slideInRight: "slideInRight 1s ease-in-out",
+        slideOutDown: "slideOutDown 1s ease-in-out forwards",
+        slideOutUp: "slideOutUp 1s ease-in-out forwards",
+        slideOutLeft: "slideOutLeft 1s ease-in-out forwards",
+        slideOutRight: "slideOutRight 1s ease-in-out forwards",
+        wiggle: "wiggle 1s ease-in-out infinite",
+        scaleUp: "scaleUp 1s ease-in-out",
+      },
+      backgroundImage: {
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+        "gradient-conic":
+          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+      },
+    },
+  },
+  plugins: [
+    nextui({
+      addCommonColors: true,
+      layout: {
+        disabledOpacity: 1.0,
+      },
+    }),
+  ],
+};
+export default config;

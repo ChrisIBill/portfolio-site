@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "REACT_APP_API_PATH=4000 && json-logger INFO 'running dev' | tee -a pino.log.out.json pino.log.server.json pino.log.info.json pino.log.client.json && next dev -p $REACT_APP_API_PATH | pino-pretty -c -t",
+    "dev": "REACT_APP_API_PATH=3000 && json-logger INFO 'running dev' | tee -a pino.log.out.json pino.log.server.json pino.log.info.json pino.log.client.json && next dev -p $REACT_APP_API_PATH | pino-pretty -c -t",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -11,7 +11,9 @@
   "dependencies": {
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
-    "@nextui-org/react": "^2.2.9",
+    "@nextui-org/react": "^2.4.6",
+    "@nextui-org/system": "^2.2.5",
+    "@nextui-org/theme": "^2.2.9",
     "@pixi/react": "^7.1.1",
     "@theme-toggles/react": "^4.1.0",
     "framer-motion": "^10.17.4",
