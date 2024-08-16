@@ -16,13 +16,17 @@ import logger from "@/lib/pino";
 const NavigationProviderLog = logger.child({ module: "NavigationProvider" });
 
 export const ExitAnimationStrings = [
-  "animate-slideOutLeft",
-  "animate-slideOutRight",
+  "animate-slideOutDown",
+  "animate-slideOutUp",
+  // "animate-slideOutLeft",
+  // "animate-slideOutRight",
   "animate-fadeOut",
 ] as const;
 export const EnterAnimationStrings = [
-  "animate-slideInLeft",
-  "animate-slideInRight",
+  "animate-slideInDown",
+  "animate-slideInUp",
+  // "animate-slideInLeft",
+  // "animate-slideInRight",
   "animate-fadeIn",
 ] as const;
 const AnimationStrings = [
@@ -32,7 +36,7 @@ const AnimationStrings = [
 ] as const;
 export type ExitAnimationStringType = (typeof ExitAnimationStrings)[number];
 export type EnterAnimationStringType = (typeof EnterAnimationStrings)[number];
-export type AnimationStringType = (typeof AnimationStrings)[number];
+export type AnimationStringType = (typeof AnimationStrings)[number] | "";
 
 export function NavigationProvider({
   children,
@@ -53,7 +57,7 @@ export function NavigationProvider({
   const asyncDelayRouterSwitch = useCallback(
     async (
       url: InternalLinkType,
-      cb: () => void,
+      // cb: () => void,
       delay = 500,
     ): Promise<void | (() => void)> => {
       NavigationProviderLog.debug({
@@ -70,8 +74,10 @@ export function NavigationProvider({
         }, delay);
       }).then((res) => {
         NavigationProviderLog.debug({ message: "asyncDelayFn then ", res });
-        if (res instanceof Function) res();
-        else throw new Error("Invalid res", { cause: res });
+        if (res instanceof Function) {
+          res();
+          // cb();
+        } else throw new Error("Invalid res", { cause: res });
         //cb()
       });
     },
@@ -88,21 +94,24 @@ export function NavigationProvider({
         requestedPage: requestedPage.current,
         pageRefs: pageRefs.current,
       });
-      if (animateNavigation) {
-        throw new Error("Navigation already animating", {
-          cause: animateNavigation,
-        });
-      }
-      setAnimateNavigation(true);
+      // if (animateNavigation) {
+      //   throw new Error("Navigation already animating", {
+      //     cause: animateNavigation,
+      //   });
+      // }
       if (direction === "next") {
         requestedPage.current = pageRefs.current.next;
-        setAnimationString("animate-slideOutLeft");
+        // setAnimationString("animate-slideOutUp");
+        await asyncDelayRouterSwitch(pageRefs.current.next, 1000);
       } else if (direction === "prev") {
-        setAnimationString("animate-slideOutRight");
         requestedPage.current = pageRefs.current.prev;
+        // setAnimationString("animate-slideOutDown");
+        await asyncDelayRouterSwitch(pageRefs.current.prev, 1000);
       }
+      setAnimateNavigation(false);
+      setAnimationString("");
     },
-    [animateNavigation],
+    [animateNavigation, router],
   );
 
   const handleRouteRequest = useCallback((route: string) => {
@@ -116,52 +125,59 @@ export function NavigationProvider({
     if (!isInternalLink(route))
       throw new Error("Invalid route", { cause: route });
     if (route === pageRefs.current.next)
-      setAnimationString("animate-slideOutRight");
+      setAnimationString("animate-slideOutUp");
     else if (route === pageRefs.current.prev)
-      setAnimationString("animate-slideOutLeft");
+      setAnimationString("animate-slideOutDown");
     else setAnimationString("animate-fadeOut");
-    requestedPage.current = route;
   }, []);
 
-  useEffect(() => {
-    NavigationProviderLog.debug({
-      message: "animating navigation",
-      animationString,
-      requestedPage: requestedPage.current,
-    });
-
-    async function animate() {
-      switch (animationString) {
-        case "animate-slideOutLeft":
-          await asyncDelayRouterSwitch(
-            requestedPage.current,
-            () => setAnimationString("animate-slideInRight"),
-            500,
-          );
-          NavigationProviderLog.debug("animate-slideOutLeft");
-          break;
-        case "animate-slideOutRight":
-          asyncDelayRouterSwitch(
-            requestedPage.current,
-            () => setAnimationString("animate-slideInLeft"),
-            500,
-          );
-          NavigationProviderLog.debug("animate-slideOutRight");
-          break;
-        case "animate-fadeOut":
-          asyncDelayRouterSwitch(
-            requestedPage.current,
-            () => setAnimationString("animate-fadeIn"),
-            500,
-          );
-          break;
-        default:
-          NavigationProviderLog.debug("default case");
-          break;
-      }
-    }
-    animate();
-  }, [animationString, asyncDelayRouterSwitch]);
+  // useEffect(() => {
+  //   NavigationProviderLog.debug({
+  //     message: "animating navigation",
+  //     animationString,
+  //     requestedPage: requestedPage.current,
+  //   });
+  //
+  //   async function animate() {
+  //     switch (animationString) {
+  //       case "animate-slideOutDown":
+  //         requestedPage.current = pageRefs.current.prev;
+  //         await asyncDelayRouterSwitch(
+  //           pageRefs.current.prev,
+  //           () => {
+  //             setAnimationString("");
+  //             setAnimateNavigation(false);
+  //           },
+  //           500,
+  //         );
+  //         NavigationProviderLog.debug("animate-slideOutDown");
+  //         break;
+  //       case "animate-slideOutUp":
+  //         requestedPage.current = pageRefs.current.next;
+  //         asyncDelayRouterSwitch(
+  //           pageRefs.current.next,
+  //           () => {
+  //             setAnimationString("");
+  //             setAnimateNavigation(false);
+  //           },
+  //           500,
+  //         );
+  //         NavigationProviderLog.debug("animate-slideOutUp");
+  //         break;
+  //       case "animate-fadeOut":
+  //         asyncDelayRouterSwitch(
+  //           requestedPage.current,
+  //           () => setAnimationString("animate-fadeIn"),
+  //           500,
+  //         );
+  //         break;
+  //       default:
+  //         NavigationProviderLog.debug("default case");
+  //         break;
+  //     }
+  //   }
+  //   animate();
+  // }, [animationString, asyncDelayRouterSwitch]);
   useEffect(() => {
     NavigationProviderLog.debug({
       message: "setting current page",
@@ -175,16 +191,16 @@ export function NavigationProvider({
     });
     setCurrentPage(pathname);
     if (pathname === pageRefs.current.next)
-      setAnimationString("animate-slideInRight");
+      setAnimationString("animate-slideInUp");
     else if (pathname === pageRefs.current.prev)
-      setAnimationString("animate-slideInLeft");
+      setAnimationString("animate-slideInDown");
     else setAnimationString("animate-fadeIn");
     requestedPage.current = pathname;
     pageRefs.current = {
-      prev: InternalLinks[
+      next: InternalLinks[
         (InternalLinks.indexOf(pathname) + 1) % InternalLinks.length
       ],
-      next: InternalLinks.at(
+      prev: InternalLinks.at(
         InternalLinks.indexOf(pathname) - 1,
       ) as InternalLinkType,
     };

@@ -1,3 +1,14 @@
+import { InternalLinks } from "@/components/links";
+import { PagesArray } from "@/components/pages/pages";
+
+export function getNextPage(currentPage: number) {
+  return PagesArray[(currentPage + 1) % InternalLinks.length];
+}
+export function getPreviousPage(currentPage: number) {
+  return PagesArray[
+    currentPage > 0 ? currentPage - 1 : InternalLinks.length - 1
+  ];
+}
 export function getCircularReplacer() {
   const ancestors: any[] = [];
   return function (this: any, key: any, value: any) {

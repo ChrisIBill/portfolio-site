@@ -16,6 +16,7 @@ export interface NavigationContextType {
   handleRouteRequest: (route: InternalLinkType) => void;
   swipePosition: number;
   setSwipePosition: (value: number) => void;
+  routeIndex: number;
 }
 
 export const NavigationContext = createContext({
@@ -29,6 +30,7 @@ export const NavigationContext = createContext({
   handleRouteRequest: (route: InternalLinkType) => {},
   swipePosition: 0,
   setSwipePosition: (value: number) => {},
+  routeIndex: 0,
 });
 
 // export interface GenericLoopingIterator<K, T extends readonly K[]> {

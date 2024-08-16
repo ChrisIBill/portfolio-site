@@ -36,31 +36,29 @@ const DynamicProjectsPage = dynamic(
 export const Preloads = ({ children }: { children: React.ReactNode }) => {
   const { routeIndex } = useContext(NavigationContext);
 
-  const PagesArray = [
-    <DynamicHomePage key={0} />,
-    <DynamicAboutPage key={1} />,
-    <DynamicProjectsPage key={2} />,
-  ];
-  function getNextPage(currentPage: number) {
-    return PagesArray[(currentPage + 1) % InternalLinks.length];
-  }
-  function getPreviousPage(currentPage: number) {
-    return PagesArray[
-      currentPage > 0 ? currentPage - 1 : InternalLinks.length - 1
-    ];
-  }
-  const PrevPage = getPreviousPage(routeIndex);
-  const NextPage = getNextPage(routeIndex);
+  const PagesArray = React.useMemo(
+    () => [
+      <DynamicHomePage key={0} />,
+      <DynamicAboutPage key={1} />,
+      <DynamicProjectsPage key={2} />,
+    ],
+    [],
+  );
   return (
-    <div className="absolute flex flex-col justify-between items-center h-[150vh] top-[50%] translate-y-[-50%]">
-      <div className="flex flex-col justify-center items-center">
-        {PagesArray[(routeIndex + 1) % InternalLinks.length]}
-      </div>
-      {children}
-      <div className="flex flex-col justify-center items-center">
-        {PagesArray[routeIndex > 0 ? routeIndex - 1 : InternalLinks.length - 1]}
+    <div className="absolute flex h-[150vh] top-[50%] translate-y-[-50%]">
+      <div className="flex relative h-full flex-col top-16 justify-between items-center">
+        <div className="">
+          {
+            PagesArray[
+              routeIndex > 0 ? routeIndex - 1 : InternalLinks.length - 1
+            ]
+          }
+        </div>
+        <div className="">{children}</div>
+        <div className="">
+          {PagesArray[(routeIndex + 1) % InternalLinks.length]}
+        </div>
       </div>
     </div>
   );
-  return <></>;
 };

@@ -8,6 +8,8 @@ import SwipeableLayer from "@/components/swipeable-layer";
 import NextHeader from "@/components/header";
 import Footer from "@/components/footer";
 import CustomPagination from "@/components/pagination";
+import { Preloads } from "@/components/pages/preloads";
+import MatterTest from "@/components/matter-test";
 
 const font = Lato({ weight: "400", subsets: ["latin"] });
 
@@ -70,27 +72,30 @@ export default function RootLayout({
               <NextHeader />
               <div
                 id="scrollable"
-                className="w-screen h-screen overflow-y-scroll overflow-x-scroll xs:overflow-x-hidden flex flex-col fixed"
+                className="w-screen h-screen overflow-y-hidden overflow-x-hidden xs:overflow-x-hidden flex flex-col fixed"
               >
                 <div
                   id="scrollable-content"
                   className="absolute min-h-screen flex flex-col"
                 >
-                  <SwipeableLayer className="relative z-5 flex-grow flex overflow-x-hidden">
-                    <main
-                      className={
-                        font.className +
-                        " relative z-10 box-border flex justify-center"
-                      }
-                    >
-                      {children}
-                    </main>
+                  <MatterTest />
+                  <SwipeableLayer className="relative z-5 flex-grow flex overflow-x-hidden overflow-y-hidden">
+                    <Preloads>
+                      <main
+                        className={
+                          font.className +
+                          " relative z-10 box-border flex justify-center"
+                        }
+                      >
+                        {children}
+                      </main>
+                    </Preloads>
                   </SwipeableLayer>
-                  <div id="pagination-filler-item" className="h-16"></div>
-                  <Footer />
+                  {/* <div id="pagination-filler-item" className="h-16"></div> */}
                 </div>
               </div>
               <CustomPagination />
+              <Footer />
             </Providers>
           </div>
         </div>

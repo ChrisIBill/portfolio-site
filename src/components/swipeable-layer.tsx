@@ -23,12 +23,13 @@ const SwipeableLayer = (props: {
   children: React.ReactNode;
   className?: string;
 }) => {
-  SwipeableLayerLog.debug({ message: "render SwipeableLayer" });
+  // SwipeableLayerLog.debug({ message: "render SwipeableLayer" });
   const pathname = usePathname();
   const {
     animateNavigation,
     setAnimateNavigation,
     animationString,
+    setAnimationString,
     handleRouteChange,
     swipePosition,
     setSwipePosition,
@@ -36,16 +37,28 @@ const SwipeableLayer = (props: {
   const { addToScroll, overScroll } = useScrollPosition();
 
   const swipeHandlers = useSwipeable({
-    onSwipedLeft: (e) => {
-      SwipeableLayerLog.debug({ message: "user swiped left", e });
-      if (e.deltaX < -SWIPE_THRESHOLD) {
-        handleRouteChange("next");
+    // onSwipedLeft: (e) => {
+    //   SwipeableLayerLog.debug({ message: "user swiped left", e });
+    //   if (e.deltaX < -SWIPE_THRESHOLD) {
+    //     handleRouteChange("next");
+    //   }
+    // },
+    // onSwipedRight: (e) => {
+    //   SwipeableLayerLog.debug({ message: "user swiped right", e });
+    //   if (e.deltaX > SWIPE_THRESHOLD) {
+    //     handleRouteChange("prev");
+    //   }
+    // },
+    onSwipedDown: (e) => {
+      SwipeableLayerLog.debug({ message: "user swiped down", e });
+      if (e.deltaY > SWIPE_THRESHOLD) {
+        setAnimationString("animate-slideOutDown");
       }
     },
-    onSwipedRight: (e) => {
-      SwipeableLayerLog.debug({ message: "user swiped right", e });
-      if (e.deltaX > SWIPE_THRESHOLD) {
-        handleRouteChange("prev");
+    onSwipedUp: (e) => {
+      SwipeableLayerLog.debug({ message: "user swiped up", e });
+      if (e.deltaY < -SWIPE_THRESHOLD) {
+        setAnimationString("animate-slideOutUp");
       }
     },
     onSwiping: (e) => {
@@ -55,7 +68,7 @@ const SwipeableLayer = (props: {
         deltaY: e.deltaY,
       });
       if (Math.abs(e.deltaX) >= 15) {
-        setSwipePosition(e.deltaX);
+        setSwipePosition(e.deltaY);
       }
       addToScroll(-e.deltaY);
     },
@@ -72,12 +85,31 @@ const SwipeableLayer = (props: {
     swipeDuration: Infinity,
   });
 
-  useEffect(() => {
-    if (animateNavigation) return;
-    setSwipePosition(overScroll);
+  const animationHandler = () => {
+    console.log("animation Handler");
+    // if (animateNavigation) return;
     if (overScroll <= -50) {
       handleRouteChange("prev");
     } else if (overScroll >= 50) {
+      handleRouteChange("next");
+    }
+  };
+
+  useEffect(() => {
+    SwipeableLayerLog.debug({
+      message: "overScroll",
+      overScroll,
+      animateNavigation,
+    });
+
+    setSwipePosition(-overScroll);
+    if (overScroll <= -50) {
+      setAnimateNavigation(true);
+      setAnimationString("animate-slideOutUp");
+      handleRouteChange("prev");
+    } else if (overScroll >= 50) {
+      setAnimateNavigation(true);
+      setAnimationString("animate-slideOutDown");
       handleRouteChange("next");
     }
   }, [overScroll]);
@@ -96,7 +128,7 @@ const SwipeableLayer = (props: {
         EnterAnimationStrings.includes(
           animationString as EnterAnimationStringType,
         )
-          ? setAnimateNavigation(false)
+          ? animationHandler()
           : null;
       }}
     >
@@ -106,7 +138,7 @@ const SwipeableLayer = (props: {
         {...swipeHandlers}
         style={{
           position: "relative",
-          left: swipePosition,
+          top: swipePosition,
         }}
       >
         {props.children}
