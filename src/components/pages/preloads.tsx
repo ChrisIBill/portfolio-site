@@ -22,17 +22,6 @@ const DynamicProjectsPage = dynamic(
   },
 );
 
-// React.memo(function PreviousPage() {
-//   const { routeIndex } = useContext(NavigationContext);
-//   console.log("Rendering Previous Page: ", routeIndex);
-//   return getPreviousPage(routeIndex);
-// });
-//
-// React.memo(function NextPage() {
-//   console.log("Rendering Next Page: ", routeIndex);
-//   return getNextPage(routeIndex);
-// });
-
 export const Preloads = ({ children }: { children: React.ReactNode }) => {
   const { routeIndex } = useContext(NavigationContext);
 
@@ -45,17 +34,22 @@ export const Preloads = ({ children }: { children: React.ReactNode }) => {
     [],
   );
   return (
-    <div className="absolute flex h-[150vh] top-[50%] translate-y-[-50%]">
-      <div className="flex relative h-full flex-col top-16 justify-between items-center">
-        <div className="">
-          {
-            PagesArray[
-              routeIndex > 0 ? routeIndex - 1 : InternalLinks.length - 1
-            ]
-          }
+    <div className="absolute flex content-between h-[300vh] top-[50%] translate-y-[-50%]">
+      <div className="flex relative h-full flex-col top-[-6rem]">
+        <div className="h-screen flex justify-center items-center">
+          <div className="relative z-10 box-border flex justify-center">
+            {
+              PagesArray[
+                routeIndex > 0 ? routeIndex - 1 : InternalLinks.length - 1
+              ]
+            }
+          </div>
         </div>
-        <div className="">{children}</div>
-        <div className="">
+        <div className="h-screen flex justify-center items-center">
+          {children}
+        </div>
+        <div className="h-screen flex justify-center items-center">
+          <div className="relative z-10 box-border flex justify-center"></div>
           {PagesArray[(routeIndex + 1) % InternalLinks.length]}
         </div>
       </div>

@@ -115,6 +115,8 @@ const SwipeableLayer = (props: {
   }, [overScroll]);
 
   useEffect(() => {
+    setAnimateNavigation(false);
+    setAnimationString("");
     setSwipePosition(0);
   }, [pathname]);
 

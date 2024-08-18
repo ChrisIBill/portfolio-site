@@ -69,31 +69,33 @@ export default function RootLayout({
               />
             ) : null}
             <Providers className="absolute z-10 min-h-screen flex flex-col justify-between opacity-100 visible overflow-visible">
-              <NextHeader />
-              <div
-                id="scrollable"
-                className="w-screen h-screen overflow-y-hidden overflow-x-hidden xs:overflow-x-hidden flex flex-col fixed"
-              >
+              <main className={font.className}>
+                <NextHeader />
                 <div
-                  id="scrollable-content"
-                  className="absolute min-h-screen flex flex-col"
+                  id="scrollable"
+                  className="w-screen h-screen overflow-y-hidden overflow-x-hidden xs:overflow-x-hidden flex flex-col fixed"
                 >
-                  <MatterTest />
-                  <SwipeableLayer className="relative z-5 flex-grow flex overflow-x-hidden overflow-y-hidden">
-                    <Preloads>
-                      <main
-                        className={
-                          font.className +
-                          " relative z-10 box-border flex justify-center"
-                        }
-                      >
-                        {children}
-                      </main>
-                    </Preloads>
-                  </SwipeableLayer>
-                  {/* <div id="pagination-filler-item" className="h-16"></div> */}
+                  <div
+                    id="scrollable-content"
+                    className="absolute min-h-screen flex flex-col"
+                  >
+                    <MatterTest />
+                    <SwipeableLayer className="relative z-5 flex-grow flex overflow-x-hidden overflow-y-hidden">
+                      <Preloads>
+                        <div
+                          className={
+                            font.className +
+                            " relative z-10 box-border flex justify-center"
+                          }
+                        >
+                          {children}
+                        </div>
+                      </Preloads>
+                    </SwipeableLayer>
+                    {/* <div id="pagination-filler-item" className="h-16"></div> */}
+                  </div>
                 </div>
-              </div>
+              </main>
               <CustomPagination />
               <Footer />
             </Providers>
