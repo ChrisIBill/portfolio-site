@@ -7,13 +7,7 @@ import useScrollPosition from "@/lib/hooks/scroll-position";
 import { useSwipeable } from "react-swipeable";
 import { useContext } from "react";
 import { NavigationContext } from "@/lib/navigation-context";
-import {
-  AnimationStringType,
-  EnterAnimationStringType,
-  EnterAnimationStrings,
-  ExitAnimationStringType,
-  ExitAnimationStrings,
-} from "./navigation-provider";
+import { AnimationStringType } from "./navigation-provider";
 
 const SwipeableLayerLog = logger.child({ module: "SwipeableLayer" });
 
@@ -23,7 +17,6 @@ const SwipeableLayer = (props: {
   children: React.ReactNode;
   className?: string;
 }) => {
-  // SwipeableLayerLog.debug({ message: "render SwipeableLayer" });
   const pathname = usePathname();
   const {
     animateNavigation,
@@ -34,31 +27,23 @@ const SwipeableLayer = (props: {
     swipePosition,
     setSwipePosition,
   } = useContext(NavigationContext);
-  const { addToScroll, overScroll } = useScrollPosition();
+  const { addToScroll, overScroll, resetOverScroll } = useScrollPosition();
 
   const swipeHandlers = useSwipeable({
-    // onSwipedLeft: (e) => {
-    //   SwipeableLayerLog.debug({ message: "user swiped left", e });
-    //   if (e.deltaX < -SWIPE_THRESHOLD) {
-    //     handleRouteChange("next");
-    //   }
-    // },
-    // onSwipedRight: (e) => {
-    //   SwipeableLayerLog.debug({ message: "user swiped right", e });
-    //   if (e.deltaX > SWIPE_THRESHOLD) {
-    //     handleRouteChange("prev");
-    //   }
-    // },
     onSwipedDown: (e) => {
       SwipeableLayerLog.debug({ message: "user swiped down", e });
       if (e.deltaY > SWIPE_THRESHOLD) {
-        setAnimationString("animate-slideOutDown");
+        setAnimateNavigation(true);
+        setAnimationString("animate-slideOutUp");
+        handleRouteChange("prev");
       }
     },
     onSwipedUp: (e) => {
       SwipeableLayerLog.debug({ message: "user swiped up", e });
       if (e.deltaY < -SWIPE_THRESHOLD) {
-        setAnimationString("animate-slideOutUp");
+        setAnimateNavigation(true);
+        setAnimationString("animate-slideOutDown");
+        handleRouteChange("next");
       }
     },
     onSwiping: (e) => {
@@ -85,16 +70,6 @@ const SwipeableLayer = (props: {
     swipeDuration: Infinity,
   });
 
-  const animationHandler = () => {
-    console.log("animation Handler");
-    // if (animateNavigation) return;
-    if (overScroll <= -50) {
-      handleRouteChange("prev");
-    } else if (overScroll >= 50) {
-      handleRouteChange("next");
-    }
-  };
-
   useEffect(() => {
     SwipeableLayerLog.debug({
       message: "overScroll",
@@ -115,10 +90,22 @@ const SwipeableLayer = (props: {
   }, [overScroll]);
 
   useEffect(() => {
+    SwipeableLayerLog.debug({
+      message: "route change, reseting swipe state",
+    });
     setAnimateNavigation(false);
     setAnimationString("");
     setSwipePosition(0);
   }, [pathname]);
+
+  useEffect(() => {
+    SwipeableLayerLog.debug({
+      message: "Animation State Change",
+      animateNavigation,
+      animationString,
+      swipePosition,
+    });
+  }, [animateNavigation, animationString, swipePosition]);
 
   return (
     <div
@@ -126,13 +113,6 @@ const SwipeableLayer = (props: {
         "relative z-5 w-full overflow-visible flex-grow pt-16 top-0 left-0 flex justify-center items-center transition-all duration-300 " +
         (animateNavigation ? animationString : "")
       }
-      onAnimationEnd={() => {
-        EnterAnimationStrings.includes(
-          animationString as EnterAnimationStringType,
-        )
-          ? animationHandler()
-          : null;
-      }}
     >
       <div
         id="draggable"

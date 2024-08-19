@@ -47,7 +47,8 @@ export function NavigationProvider({
   const [currentPage, setCurrentPage] = useState<InternalLinkType>(
     pathname as InternalLinkType,
   );
-  const requestedPage = useRef<InternalLinkType>(InternalLink.Home);
+  const pageRefs = useRef<{ [key: string]: InternalLinkType }>({});
+
   const [swipePosition, setSwipePosition] = useState(0);
 
   const asyncDelayRouterSwitch = useCallback(
@@ -65,7 +66,7 @@ export function NavigationProvider({
         NavigationProviderLog.debug("asyncDelayFn resolved promise");
         return setTimeout(() => {
           resolve(() => {
-            router.push(url);
+            router.push(url, { scroll: false });
             callback?.();
           });
         }, delay);
@@ -78,7 +79,6 @@ export function NavigationProvider({
     },
     [router],
   );
-  const pageRefs = useRef<{ [key: string]: InternalLinkType }>({});
 
   //Route Change Handlers
   const handleRouteChange = useCallback(
@@ -86,14 +86,11 @@ export function NavigationProvider({
       NavigationProviderLog.debug({
         message: "handleRouteChange",
         direction,
-        requestedPage: requestedPage.current,
         pageRefs: pageRefs.current,
       });
       if (direction === "next") {
-        requestedPage.current = pageRefs.current.next;
         await asyncDelayRouterSwitch(pageRefs.current.next, 1000);
       } else if (direction === "prev") {
-        requestedPage.current = pageRefs.current.prev;
         await asyncDelayRouterSwitch(pageRefs.current.prev, 1000);
       }
     },
@@ -104,7 +101,6 @@ export function NavigationProvider({
     NavigationProviderLog.debug({
       message: "handleRouteChange",
       route,
-      requestedPage: requestedPage.current,
       pageRefs: pageRefs.current,
     });
     setAnimateNavigation(true);
@@ -120,30 +116,30 @@ export function NavigationProvider({
   useEffect(() => {
     if (!isInternalLink(pathname))
       throw new Error("Invalid pathname", { cause: pathname });
+    const next =
+      InternalLinks[
+        (InternalLinks.indexOf(pathname) + 1) % InternalLinks.length
+      ];
+    const prev = InternalLinks.at(
+      InternalLinks.indexOf(pathname) - 1,
+    ) as InternalLinkType;
     NavigationProviderLog.debug({
       message: "setting current page",
       pathname,
+      prev: prev,
+      next: next,
+      pageRefs: pageRefs.current,
     });
     setCurrentPage(pathname);
-    if (pathname === pageRefs.current.next)
-      setAnimationString("animate-slideInUp");
-    else if (pathname === pageRefs.current.prev)
-      setAnimationString("animate-slideInDown");
-    else setAnimationString("animate-fadeIn");
-    requestedPage.current = pathname;
     pageRefs.current = {
-      next: InternalLinks[
-        (InternalLinks.indexOf(pathname) + 1) % InternalLinks.length
-      ],
-      prev: InternalLinks.at(
-        InternalLinks.indexOf(pathname) - 1,
-      ) as InternalLinkType,
+      next: next,
+      prev: prev,
     };
   }, [pathname]);
 
   useEffect(() => {
-    router.prefetch(pageRefs.current.prev);
-    router.prefetch(pageRefs.current.next);
+    if (pageRefs.current.prev) router.prefetch(pageRefs.current.prev);
+    if (pageRefs.current.next) router.prefetch(pageRefs.current.next);
   }, [pageRefs.current.prev, pageRefs.current.next]);
 
   return (
@@ -166,17 +162,3 @@ export function NavigationProvider({
     </NavigationContext.Provider>
   );
 }
-// async function asyncDelayRouterSwitch(router, url: InternalLinkType, delay = 500) {
-//     NavigationProviderLog.debug({ message: 'asyncDelayRouterSwitch', url, delay })
-//     router.prefetch(url)
-//     return new Promise(
-//         resolve => {
-//             NavigationProviderLog.debug('asyncDelayFn resolved promise')
-//             return setTimeout(() => {
-//                 resolve(() => {
-//                     router.push(url)
-//                 })
-//             }, delay)
-//         },
-//     )
-// }
