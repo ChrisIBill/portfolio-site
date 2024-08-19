@@ -79,7 +79,6 @@ export default function RootLayout({
                     id="scrollable-content"
                     className="absolute min-h-screen flex flex-col"
                   >
-                    <MatterTest />
                     <SwipeableLayer className="relative z-5 flex-grow flex overflow-x-hidden overflow-y-hidden">
                       <Preloads>
                         <div

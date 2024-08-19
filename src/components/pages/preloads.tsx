@@ -34,7 +34,7 @@ export const Preloads = ({ children }: { children: React.ReactNode }) => {
     [],
   );
   return (
-    <div className="absolute flex content-between h-[300vh] top-[50%] translate-y-[-50%]">
+    <div className="absolute h-[300vh] top-[50%] translate-y-[-50%]">
       <div className="flex relative h-full flex-col top-[-6rem]">
         <div className="h-screen flex justify-center items-center">
           <div className="relative z-10 box-border flex justify-center">
