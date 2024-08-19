@@ -31,7 +31,7 @@ export type SolarBodies = {
 };
 
 const SUN_PROPS: SolarObjectProps = {
-  radius: 100,
+  radius: 50,
   mass: 33300,
   label: "SUN",
   fillStyle: "yellow",
@@ -72,7 +72,7 @@ const VENUS_PROPS: SolarObjectProps = {
 } as const;
 
 const EARTH_PROPS: SolarObjectProps = {
-  radius: 1,
+  radius: 10,
   orbit: {
     semiMajorAxis: 1,
     periapsis: 0.9833,
@@ -95,11 +95,11 @@ const ROCKET_PROPS: SolarObjectProps = {
   fillStyle: "black",
 } as const;
 const MOON_PROPS: SolarObjectProps = {
-  radius: 0.5,
+  radius: 2.5,
   orbit: {
-    semiMajorAxis: 0.002569 * 5,
-    apoapsis: 0.00271 * 5,
-    periapsis: 0.002424 * 5,
+    semiMajorAxis: 0.002569,
+    apoapsis: 0.00271,
+    periapsis: 0.002424,
   },
   label: "MOON",
   mass: 0.123,
@@ -296,7 +296,7 @@ export const solarSystemObjects = (cw: number, ch: number) => {
   const generateAsteroid = (index: number) => {
     let apoapsis = gaussianRandom(3.5, 0.7);
     let periapsis = gaussianRandom(2.3, 0.4);
-    const radius = (1 + Math.random() * 2) * 0.1;
+    const radius = (1 + Math.random() * 2) * 1;
     const mass = 0.0005 * radius ** 2;
     if (apoapsis < periapsis) {
       const temp = apoapsis;

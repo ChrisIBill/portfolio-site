@@ -12,7 +12,7 @@ import logger from "../pino";
 import { collisionFilters } from "./constants";
 
 const SYSTEM_SCALE = 0.2 as const;
-const AU_SCALE = 1000 as const;
+const AU_SCALE = 100000 as const;
 
 const genSolarBodies = {
   isStatic: false,

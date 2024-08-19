@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, memo, useState } from "react";
+import { useEffect, useRef, memo, useState, useContext } from "react";
 import Matter, { Bounds, Vector } from "matter-js";
 import {
   Engine,
@@ -33,6 +33,9 @@ import { getRadiusFromPoints } from "@/lib/geometry/lib";
 import pino from "pino";
 import AstronomicalBody from "@/lib/matter/astronomicalBody";
 import { EarthComponent } from "./astronomical-bodies/earth";
+import { NavigationContext } from "@/lib/navigation-context";
+import { usePathname } from "next/navigation";
+import { InternalLink, InternalLinks } from "./links";
 
 Matter.use(MatterAttractors);
 MatterAttractors.Attractors.gravityConstant = GRAVITATIONAL_CONSTANT;
@@ -47,6 +50,8 @@ const MovementLog = MatterLogger.child(
 const ROCKET_FORCE = 0.0000000001;
 
 export default function MatterTest() {
+  const { animationString } = useContext(NavigationContext);
+  const pathname = usePathname();
   const theme = useTheme().theme;
   const windowSize = useWindowSize();
   const scene = useRef<HTMLDivElement>(null);
@@ -103,6 +108,13 @@ export default function MatterTest() {
       solarObjs: SolarSystemBodies,
     });
 
+    const earth = AstronomicalBody.findSystem("EARTH");
+    // const moon = SolarSystemBodies.moon;
+    // const rocket = SolarSystemBodies.rocket;
+    // const sun = SolarSystemBodies.sun;
+    // const mercury = SolarSystemBodies.mercury;
+    // const venus = SolarSystemBodies.venus;
+
     //const solarObjsArr = [
     //  solarObjs.sun,
     //  solarObjs.mercury,
@@ -114,10 +126,6 @@ export default function MatterTest() {
     //];
 
     Composite.add(engine.current.world, SolarSystemBodies);
-    Render.lookAt(render.current, SolarSystem.current.getBody(), {
-      x: centerX,
-      y: centerY,
-    });
 
     console.log("Window", window.innerWidth, window.innerHeight);
     const mouse = Mouse.create(render.current.canvas),
@@ -162,6 +170,42 @@ export default function MatterTest() {
       "All rendered bodies",
       Composite.allBodies(engine.current.world),
     );
+
+    const viewController = () => {
+      if (!render.current || !SolarSystem.current) return;
+      if (pathname === InternalLink.Home) {
+        if (!earth) {
+          MatterLogger.error({
+            message: "Earth not found",
+          });
+          Render.lookAt(render.current, SolarSystem.current.getBody(), {
+            x: centerX,
+            y: centerY,
+          });
+        } else {
+          MatterLogger.info({
+            message: "Earth found",
+          });
+          Render.lookAt(
+            render.current,
+            earth.getBody(),
+            {
+              x: centerX,
+              y: centerY,
+            },
+            false,
+          );
+        }
+      }
+      if (pathname === InternalLink.About) {
+        Render.lookAt(render.current, SolarSystem.current.getBody(), {
+          x: centerX * 10,
+          y: centerY * 10,
+        });
+      }
+    };
+
+    Events.on(render.current, "beforeRender", viewController);
 
     //const beforeRenderCallback = () => {
     //  if (!selectedBody.current) return;
